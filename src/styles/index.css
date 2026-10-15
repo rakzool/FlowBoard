@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-primary: light-dark(#3b82f6, #60a5fa);
+  --color-brand-secondary: light-dark(#10b981, #34d399);
+  --color-surface: light-dark(#ffffff, #0f172a);
+  --color-text: light-dark(#1e293b, #f8fafc);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  
+  html.dark {
+    color-scheme: dark;
+  }
+}
