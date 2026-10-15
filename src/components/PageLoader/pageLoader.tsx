@@ -1,8 +1,10 @@
+import Paper from "../DesignComponents/Paper";
+
 const PageLoader = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-surface text-text">
+    <Paper className="flex items-center justify-center min-h-screen">
       <div className="w-10 h-10 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"></div>
-    </div>
+    </Paper>
   );
 };
 
