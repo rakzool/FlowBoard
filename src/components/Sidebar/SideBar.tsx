@@ -5,16 +5,9 @@ import useSideBar from "../../hooks/useSideBar";
 import AddForm from "./AddForm";
 import FolderTree from "./FolderTree";
 
-type TSidebarProps = {
-  currentView?: "home" | "analytics";
-  onViewChange?: (view: "home" | "analytics") => void;
-};
 const workspaceIcon = "◆";
 
-export default function Sidebar({
-  currentView = "home",
-  onViewChange = () => undefined,
-}: TSidebarProps) {
+export default function Sidebar() {
   const {
     spaces,
     folders,
@@ -31,19 +24,6 @@ export default function Sidebar({
   return (
     <aside className="flex h-dvh w-72 shrink-0 flex-col border-r border-brand-primary/10 bg-surface">
       <nav className="flex-1 overflow-y-auto p-4">
-        <div className="mb-5 space-y-1">
-          {(["home", "analytics"] as const).map((view) => (
-            <Button
-              key={view}
-              type="button"
-              onClick={() => onViewChange(view)}
-              variant={currentView === view ? "primary" : "ghost"}
-              className="w-full px-3 py-2 text-left text-sm capitalize"
-            >
-              {view}
-            </Button>
-          ))}
-        </div>
         <div className="mb-2 flex items-center justify-between px-1">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text/45">
             Workspace
