@@ -7,7 +7,7 @@ const initialState: TSessionState = { currentUserId: "alice", selectedListId: "l
 const sessionSlice = createSlice({
   name: "session",
   initialState,
-  reducers: { selectList: (state, action: PayloadAction<string>) => { state.selectedListId = action.payload; } },
+    reducers: { selectList: (state, action: PayloadAction<string | null>) => { state.selectedListId = action.payload; } },
 });
 
 export const { selectList } = sessionSlice.actions;

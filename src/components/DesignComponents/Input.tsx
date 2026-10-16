@@ -8,6 +8,7 @@ type TInputProps = {
   disabled?: boolean;
   error?: string;
   autoFocus?: boolean;
+  maxLength?: number;
 };
 export default function Input({
   type,
@@ -17,11 +18,12 @@ export default function Input({
   disabled,
   error,
   autoFocus,
+  maxLength,
 }: TInputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const isFloating = isFocused || value.length > 0;
+  const isFloating = type === "date" || isFocused || value.length > 0;
   return (
-    <div className="flex flex-col gap-1 w-full max-w-sm">
+    <div className="flex w-full flex-col gap-1">
       <div className="relative">
         <input
           type={type}
@@ -31,6 +33,7 @@ export default function Input({
           onBlur={() => setIsFocused(false)}
           disabled={disabled}
           autoFocus={autoFocus}
+          maxLength={maxLength}
           className={`peer w-full rounded-lg border bg-white dark:bg-slate-900 px-4 pt-5 pb-2 text-sm text-slate-800 dark:text-slate-100 outline-none transition-all duration-200 placeholder-transparent disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 dark:disabled:bg-slate-800 ${
             error
               ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
