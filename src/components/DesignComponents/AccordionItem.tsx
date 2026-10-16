@@ -6,6 +6,7 @@ type TAccordionItemProps = {
   icon?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
+  overlays?: ReactNode;
   defaultOpen?: boolean;
   level?: number;
 };
@@ -15,6 +16,7 @@ export default function AccordionItem({
   icon,
   actions,
   children,
+  overlays,
   defaultOpen = false,
   level = 0,
 }: TAccordionItemProps) {
@@ -46,6 +48,7 @@ export default function AccordionItem({
         )}
       </div>
       {open && children && <div>{children}</div>}
+      {overlays}
     </div>
   );
 }

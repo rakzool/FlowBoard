@@ -7,10 +7,12 @@ import type {
 } from "../../hooks/useSideBar";
 import Button from "../DesignComponents/Button";
 import withSuspense from "../../utils/withSuspense";
-const AddForm = withSuspense(() => import("./AddForm"));
+import AddForm from "./AddForm";
 const Boards = withSuspense(() => import("./Boards"));
-const EditItemForm = withSuspense(() => import("./EditItemForm"));
 import ContainerActions from "./ContainerActions";
+import type { TMultiInputOption } from "../DesignComponents/MultiInput";
+import ContainerDetailsModal from "./ContainerDetailsModal";
+import type { TContainerAccessDetails } from "../../store/types/common.types";
 
 type TFolderTreeProps = {
   space: TSpace;
@@ -24,8 +26,12 @@ type TFolderTreeProps = {
   editingId: string | null;
   startEditing: (id: string) => void;
   cancelEditing: () => void;
-  edit: (id: string, name: string) => void;
+  edit: (id: string, name: string, accessDetails?: TContainerAccessDetails) => void;
   remove: (id: string) => void;
+  canManage: boolean;
+  userOptions: TMultiInputOption[];
+  getAccessUserIds: (resourceId: string, mode: "allow" | "deny") => string[];
+  canCreateItems: boolean;
 };
 const icons = { space: "●", folder: "▰" };
 
@@ -43,6 +49,10 @@ export default function FolderTree({
   cancelEditing,
   edit,
   remove,
+  canManage,
+  userOptions,
+  getAccessUserIds,
+  canCreateItems,
 }: TFolderTreeProps) {
   const spaceFolders = folders.filter((folder) => folder.parentId === space.id);
   return (
@@ -53,15 +63,11 @@ export default function FolderTree({
       icon={<span className="text-xs text-brand-secondary">{icons.space}</span>}
       actions={
         <div className="flex items-center">
-          <ContainerActions
+          {canManage && <ContainerActions
             name={space.name}
             onEdit={() => startEditing(space.id)}
-            onDelete={() => {
-              if (window.confirm(`Delete ${space.name} and its contents?`))
-                remove(space.id);
-            }}
-          />
-          <Button
+          />}
+          {canCreateItems && <Button
             type="button"
             variant="subtle"
             aria-label={`Create folder in ${space.name}`}
@@ -70,18 +76,66 @@ export default function FolderTree({
             className="px-1.5 py-0.5 text-base leading-none"
           >
             +
-          </Button>
+          </Button>}
         </div>
       }
+      overlays={
+        <>
+          {editingId === space.id && (
+            <ContainerDetailsModal
+              key={editingId}
+              title={`Edit ${space.name}`}
+              name={space.name}
+              visibility={space.visibility}
+              allowedUserIds={getAccessUserIds(space.id, "allow")}
+              deniedUserIds={getAccessUserIds(space.id, "deny")}
+              userOptions={userOptions}
+              canManageAccess={canManage}
+              onSubmit={(name, accessDetails) => edit(space.id, name, accessDetails)}
+              onClose={cancelEditing}
+            />
+          )}
+          {spaceFolders.map((folder) => (
+            <div key={`folder-dialogs-${folder.id}`}>
+              {editingId === folder.id && (
+                <ContainerDetailsModal
+                  key={editingId}
+                  title={`Edit ${folder.name}`}
+                  name={folder.name}
+                  visibility={folder.visibility}
+                  allowedUserIds={getAccessUserIds(folder.id, "allow")}
+                  deniedUserIds={getAccessUserIds(folder.id, "deny")}
+                  userOptions={userOptions}
+                  canManageAccess={canManage}
+                  onSubmit={(name, accessDetails) => edit(folder.id, name, accessDetails)}
+                  onClose={cancelEditing}
+                />
+              )}
+              {boards.filter((board) => board.parentId === folder.id).map((board) => editingId === board.id && (
+                <ContainerDetailsModal
+                  key={editingId}
+                  title={`Edit ${board.name}`}
+                  name={board.name}
+                  visibility={board.visibility}
+                  allowedUserIds={getAccessUserIds(board.id, "allow")}
+                  deniedUserIds={getAccessUserIds(board.id, "deny")}
+                  userOptions={userOptions}
+                  canManageAccess={canManage}
+                  onSubmit={(name, accessDetails) => edit(board.id, name, accessDetails)}
+                  onClose={cancelEditing}
+                />
+              ))}
+              {target?.type === "board" && target.parentId === folder.id && (
+                <AddForm target={target} create={create} cancel={cancel} userOptions={userOptions} canManageAccess={canManage} />
+              )}
+            </div>
+          ))}
+          {target?.type === "folder" && target.parentId === space.id && (
+            <AddForm target={target} create={create} cancel={cancel} userOptions={userOptions} canManageAccess={canManage} />
+          )}
+        </>
+      }
     >
-      {editingId === space.id && (
-        <EditItemForm
-          key={editingId}
-          value={space.name}
-          onSubmit={(name) => edit(space.id, name)}
-          onCancel={cancelEditing}
-        />
-      )}
       {spaceFolders.map((folder) => (
         <AccordionItem
           key={folder.id}
@@ -90,15 +144,15 @@ export default function FolderTree({
           icon={<span className="text-xs text-text/60">{icons.folder}</span>}
           actions={
             <div className="flex items-center">
-              <ContainerActions
+              {canManage && <ContainerActions
                 name={folder.name}
                 onEdit={() => startEditing(folder.id)}
                 onDelete={() => {
                   if (window.confirm(`Delete ${folder.name} and its boards?`))
                     remove(folder.id);
                 }}
-              />
-              <Button
+              />}
+              {canCreateItems && <Button
                 type="button"
                 variant="subtle"
                 aria-label={`Create board in ${folder.name}`}
@@ -109,37 +163,21 @@ export default function FolderTree({
                 className="px-1.5 py-0.5 text-base leading-none"
               >
                 +
-              </Button>
+              </Button>}
             </div>
           }
         >
-          {editingId === folder.id && (
-            <EditItemForm
-              key={editingId}
-              value={folder.name}
-              onSubmit={(name) => edit(folder.id, name)}
-              onCancel={cancelEditing}
-            />
-          )}
           <Boards
             boards={boards.filter((board) => board.parentId === folder.id)}
             onSelect={selectBoard}
-            editingId={editingId}
             startEditing={startEditing}
-            cancelEditing={cancelEditing}
-            edit={edit}
             remove={remove}
+            canManage={canManage}
           />
-          {target?.type === "board" && target.parentId === folder.id && (
-            <AddForm target={target} create={create} cancel={cancel} />
-          )}
         </AccordionItem>
       ))}
       {!spaceFolders.length && (
         <p className="py-1 pl-12 text-xs text-text/40">No folders yet</p>
-      )}
-      {target?.type === "folder" && target.parentId === space.id && (
-        <AddForm target={target} create={create} cancel={cancel} />
       )}
     </AccordionItem>
   );

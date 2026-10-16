@@ -3,9 +3,9 @@ import AccordionItem from "../DesignComponents/AccordionItem";
 import Button from "../DesignComponents/Button";
 import useSideBar from "../../hooks/useSideBar";
 import withSuspense from "../../utils/withSuspense";
-const AddForm = withSuspense(() => import("./AddForm"));
+import AddForm from "./AddForm";
 const FolderTree = withSuspense(() => import("./FolderTree"));
-const EditItemForm = withSuspense(() => import("./EditItemForm"));
+import ContainerDetailsModal from "./ContainerDetailsModal";
 import ContainerActions from "./ContainerActions";
 
 const workspaceIcon = "◆";
@@ -26,6 +26,12 @@ export default function Sidebar() {
     edit,
     remove,
     selectBoard,
+    users,
+    canManage,
+    canCreateSpace,
+    canCreateInSpace,
+    getAccessUserIds,
+    lastError,
   } = useSideBar();
   const beginSpace = () => startAdding({ type: "space" });
 
@@ -36,7 +42,7 @@ export default function Sidebar() {
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text/45">
             Workspace
           </p>
-          <Button
+          {canCreateSpace && <Button
             type="button"
             variant="subtle"
             aria-label="Create space"
@@ -45,7 +51,7 @@ export default function Sidebar() {
             className="px-1.5 py-0.5 text-base leading-none"
           >
             +
-          </Button>
+          </Button>}
         </div>
         <Accordion>
           <AccordionItem
@@ -54,11 +60,11 @@ export default function Sidebar() {
             icon={<span className="text-xs">{workspaceIcon}</span>}
             actions={
               <div className="flex items-center">
-                <ContainerActions
+                {canManage && <ContainerActions
                   name="workspace"
                   onEdit={() => startEditing("workspace-flowboard")}
-                />
-                <Button
+                />}
+                {canCreateSpace && <Button
                   type="button"
                   variant="subtle"
                   aria-label="Create space"
@@ -67,18 +73,10 @@ export default function Sidebar() {
                   className="px-1.5 py-0.5 text-base leading-none"
                 >
                   +
-                </Button>
+                </Button>}
               </div>
             }
           >
-            {editingId === "workspace-flowboard" && (
-              <EditItemForm
-                key={editingId}
-                value="FlowBoard workspace"
-                onSubmit={(name) => edit("workspace-flowboard", name)}
-                onCancel={cancelEditing}
-              />
-            )}
             {spaces.map((space) => (
               <FolderTree
                 key={space.id}
@@ -95,18 +93,32 @@ export default function Sidebar() {
                 cancelEditing={cancelEditing}
                 edit={edit}
                 remove={remove}
+                canManage={canManage}
+                userOptions={users.map((user) => ({ value: user.id, label: user.name }))}
+                getAccessUserIds={getAccessUserIds}
+                canCreateItems={canCreateInSpace(space)}
               />
             ))}
             {!spaces.length && (
               <p className="py-2 pl-7 text-xs text-text/40">No spaces yet</p>
             )}
-            {adding?.type === "space" && (
-              <AddForm target={adding} create={create} cancel={cancelAdding} />
-            )}
           </AccordionItem>
-        </Accordion>
+          </Accordion>
+          {editingId === "workspace-flowboard" && (
+            <ContainerDetailsModal
+              key={editingId}
+              title="Edit workspace"
+              name="FlowBoard workspace"
+              onSubmit={(name) => edit("workspace-flowboard", name)}
+              onClose={cancelEditing}
+            />
+          )}
+          {adding?.type === "space" && (
+            <AddForm target={adding} create={create} cancel={cancelAdding} userOptions={users.map((user) => ({ value: user.id, label: user.name }))} canManageAccess={canManage} />
+          )}
       </nav>
       <div className="border-t border-brand-primary/10 px-4 py-3 text-xs text-text/50">
+        {lastError && <p role="alert" className="mb-2 rounded-lg bg-red-500/10 px-2 py-1 text-red-600">{lastError.message}</p>}
         {selectedBoard
           ? `Viewing ${selectedBoard.name}`
           : "Select a board to get started"}
