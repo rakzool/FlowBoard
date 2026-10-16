@@ -10,7 +10,7 @@ export default function Layout() {
       <AppHeader />
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
-        <Sidebar  />
+        <Sidebar />
 
         <Dashboard />
       </div>
