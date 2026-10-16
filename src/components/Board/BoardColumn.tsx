@@ -1,9 +1,10 @@
 import type { DragEvent } from "react";
-import type { TStatus, TTask } from "../../store/types/common.types";
+import type { TStatus, TTask, TUser } from "../../store/types/common.types";
 import Button from "../DesignComponents/Button";
 import withSuspense from "../../utils/withSuspense";
 
 const TaskCard = withSuspense(() => import("./TaskCard"));
+const formatDueDate = (value: string | null) => value ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(value)) : "No due date";
 
 type TBoardColumnProps = {
   status: TStatus;
@@ -13,6 +14,8 @@ type TBoardColumnProps = {
   onMoveTask: (taskId: string, statusId: string, position: number) => void;
   onDragStart: (taskId: string) => void;
   onDragEnd: () => void;
+  users: TUser[];
+  onOpenTask: (task: TTask) => void;
 };
 
 export default function BoardColumn({
@@ -23,6 +26,8 @@ export default function BoardColumn({
   onMoveTask,
   onDragStart,
   onDragEnd,
+  users,
+  onOpenTask,
 }: TBoardColumnProps) {
   const dotClass =
     status.category === "done"
@@ -77,6 +82,9 @@ export default function BoardColumn({
               onDragEnd={onDragEnd}
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => handleDrop(event, index)}
+              users={users}
+              dueDateLabel={formatDueDate(task.dueDate)}
+              onOpen={() => onOpenTask(task)}
             />
           ))
         ) : (

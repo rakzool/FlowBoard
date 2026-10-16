@@ -6,6 +6,8 @@ import type { TRootState } from "../../store/reducer/rootReducer";
 import withSuspense from "../../utils/withSuspense";
 import type { TStatus } from "../../store/types/common.types";
 import useAccessControl from "../../hooks/useAccessControl";
+import TaskDetailModal from "../Board/TaskDetailModal";
+import type { TTask } from "../../store/types/common.types";
 
 const selectBoardState = (state: TRootState): TRootState["board"] =>
   state.board;
@@ -18,7 +20,8 @@ const TaskCreateModal = withSuspense(() => import("../Board/TaskCreateModal"));
 export default function Dashboard() {
   const [view, setView] = useState<TBoardView>("board");
   const [newTaskStatusId, setNewTaskStatusId] = useState<string | null>(null);
-  const { containers, statuses, tasks } = useAppSelector(selectBoardState);
+  const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
+  const { containers, statuses, tasks, users } = useAppSelector(selectBoardState);
   const selectedListId = useAppSelector(selectSelectedListId);
   const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const { canAccess } = useAccessControl();
@@ -45,6 +48,7 @@ export default function Dashboard() {
   const boardTasks = tasks.filter((task) => task.primaryListId === board?.id);
   const newTaskStatus: TStatus | null =
     boardStatuses.find((status) => status.id === newTaskStatusId) ?? null;
+  const detailTask: TTask | null = tasks.find((task) => task.id === detailTaskId) ?? null;
 
   return (
     <Paper className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -88,13 +92,18 @@ export default function Dashboard() {
               statuses={boardStatuses}
               tasks={boardTasks}
               currentUserId={currentUserId}
+              users={users}
+              onOpenTask={(task) => setDetailTaskId(task.id)}
               onAddTask={(status) => setNewTaskStatusId(status.id)}
             />
           ) : (
             <BoardList
               statuses={boardStatuses}
               tasks={boardTasks}
+              users={users}
+              currentUserId={currentUserId}
               onAddTask={(status) => setNewTaskStatusId(status.id)}
+              onOpenTask={(task) => setDetailTaskId(task.id)}
             />
           )
         ) : (
@@ -113,6 +122,7 @@ export default function Dashboard() {
           onClose={() => setNewTaskStatusId(null)}
         />
       )}
+      <TaskDetailModal task={detailTask} status={detailTask ? boardStatuses.find((item) => item.id === detailTask.statusId) : undefined} users={users} onClose={() => setDetailTaskId(null)} />
     </Paper>
   );
 }

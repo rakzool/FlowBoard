@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Paper from "../DesignComponents/Paper";
-import type { TStatus, TTask } from "../../store/types/common.types";
+import type { TStatus, TTask, TUser } from "../../store/types/common.types";
 import withSuspense from "../../utils/withSuspense";
 import { useAppDispatch } from "../../store/hooks";
 import { moveTask } from "../../store/reducer/boardReducer";
@@ -13,6 +13,8 @@ type TBoardProps = {
   tasks: TTask[];
   onAddTask: (status: TStatus) => void;
   currentUserId: string;
+  users: TUser[];
+  onOpenTask: (task: TTask) => void;
 };
 
 export default function Board({
@@ -21,6 +23,8 @@ export default function Board({
   tasks,
   onAddTask,
   currentUserId,
+  users,
+  onOpenTask,
 }: TBoardProps) {
   const dispatch = useAppDispatch();
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
@@ -44,6 +48,8 @@ export default function Board({
                 draggingTaskId={draggingTaskId}
                 onDragStart={setDraggingTaskId}
                 onDragEnd={() => setDraggingTaskId(null)}
+                users={users}
+                onOpenTask={onOpenTask}
                 tasks={tasks
                   .filter((task) => task.statusId === status.id)
                   .sort((a, b) => a.position - b.position)}
