@@ -2,8 +2,11 @@ import Accordion from "../DesignComponents/Accordion";
 import AccordionItem from "../DesignComponents/AccordionItem";
 import Button from "../DesignComponents/Button";
 import useSideBar from "../../hooks/useSideBar";
-import AddForm from "./AddForm";
-import FolderTree from "./FolderTree";
+import withSuspense from "../../utils/withSuspense";
+const AddForm = withSuspense(() => import("./AddForm"));
+const FolderTree = withSuspense(() => import("./FolderTree"));
+const EditItemForm = withSuspense(() => import("./EditItemForm"));
+import ContainerActions from "./ContainerActions";
 
 const workspaceIcon = "◆";
 
@@ -17,6 +20,11 @@ export default function Sidebar() {
     create,
     startAdding,
     cancelAdding,
+    editingId,
+    startEditing,
+    cancelEditing,
+    edit,
+    remove,
     selectBoard,
   } = useSideBar();
   const beginSpace = () => startAdding({ type: "space" });
@@ -28,15 +36,49 @@ export default function Sidebar() {
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text/45">
             Workspace
           </p>
-          <Button type="button" variant="subtle" aria-label="Create space" title="Create space" onClick={beginSpace} className="px-1.5 py-0.5 text-base leading-none">+</Button>
+          <Button
+            type="button"
+            variant="subtle"
+            aria-label="Create space"
+            title="Create space"
+            onClick={beginSpace}
+            className="px-1.5 py-0.5 text-base leading-none"
+          >
+            +
+          </Button>
         </div>
         <Accordion>
           <AccordionItem
             title="FlowBoard workspace"
             defaultOpen
             icon={<span className="text-xs">{workspaceIcon}</span>}
-            actions={<Button type="button" variant="subtle" aria-label="Create space" title="Create space" onClick={beginSpace} className="px-1.5 py-0.5 text-base leading-none">+</Button>}
+            actions={
+              <div className="flex items-center">
+                <ContainerActions
+                  name="workspace"
+                  onEdit={() => startEditing("workspace-flowboard")}
+                />
+                <Button
+                  type="button"
+                  variant="subtle"
+                  aria-label="Create space"
+                  title="Create space"
+                  onClick={beginSpace}
+                  className="px-1.5 py-0.5 text-base leading-none"
+                >
+                  +
+                </Button>
+              </div>
+            }
           >
+            {editingId === "workspace-flowboard" && (
+              <EditItemForm
+                key={editingId}
+                value="FlowBoard workspace"
+                onSubmit={(name) => edit("workspace-flowboard", name)}
+                onCancel={cancelEditing}
+              />
+            )}
             {spaces.map((space) => (
               <FolderTree
                 key={space.id}
@@ -48,6 +90,11 @@ export default function Sidebar() {
                 create={create}
                 cancel={cancelAdding}
                 selectBoard={selectBoard}
+                editingId={editingId}
+                startEditing={startEditing}
+                cancelEditing={cancelEditing}
+                edit={edit}
+                remove={remove}
               />
             ))}
             {!spaces.length && (

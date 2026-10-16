@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
 type TButtonProps = ComponentPropsWithoutRef<"button"> & {
   variant?: "primary" | "ghost" | "subtle";
@@ -10,6 +10,10 @@ const variantClasses = {
   subtle: "text-text/50 hover:bg-brand-primary/10 hover:text-brand-primary",
 };
 
-export default function Button({ variant = "ghost", className = "", ...props }: TButtonProps) {
-  return <button className={`rounded-lg font-medium transition-colors ${variantClasses[variant]} ${className}`} {...props} />;
-}
+const Button = forwardRef<HTMLButtonElement, TButtonProps>(({ variant = "ghost", className = "", ...props }, ref) => (
+  <button ref={ref} className={`rounded-lg font-medium transition-colors ${variantClasses[variant]} ${className}`} {...props} />
+));
+
+Button.displayName = "Button";
+
+export default Button;

@@ -1,26 +1,70 @@
+import { useState } from "react";
 import Paper from "../DesignComponents/Paper";
 import type { TStatus, TTask } from "../../store/types/common.types";
-import BoardColumn from "./BoardColumn";
 import Button from "../DesignComponents/Button";
+import withSuspense from "../../utils/withSuspense";
+import { useAppDispatch } from "../../store/hooks";
+import { moveTask } from "../../store/reducer/boardReducer";
 
-type TBoardProps = { name: string; statuses: TStatus[]; tasks: TTask[] };
+const BoardColumn = withSuspense(() => import("./BoardColumn"));
 
-export default function Board({ name, statuses, tasks }: TBoardProps) {
+type TBoardProps = {
+  name: string;
+  statuses: TStatus[];
+  tasks: TTask[];
+  onAddTask: (status: TStatus) => void;
+};
+
+export default function Board({
+  name,
+  statuses,
+  tasks,
+  onAddTask,
+}: TBoardProps) {
+  const dispatch = useAppDispatch();
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const onMoveTask = (taskId: string, statusId: string, position: number) => {
+    dispatch(moveTask({ taskId, statusId, position }));
+    setDraggingTaskId(null);
+  };
   return (
     <Paper className="flex min-h-full min-w-max flex-1 flex-col rounded-xl border border-brand-primary/10 p-4">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">{name}</h2>
-        <Button type="button" variant="ghost" className="border border-brand-primary/15 px-3 py-2 text-xs hover:border-brand-primary hover:text-brand-primary">Board settings</Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="border border-brand-primary/15 px-3 py-2 text-xs hover:border-brand-primary hover:text-brand-primary"
+        >
+          Board settings
+        </Button>
       </div>
       {statuses.length ? (
         <div className="flex min-h-0 flex-1 gap-4">
           {statuses.map((status) => (
-            <BoardColumn key={status.id} status={status} tasks={tasks.filter((task) => task.statusId === status.id).sort((a, b) => a.position - b.position)} />
+            <div key={status.id} className="contents">
+              <BoardColumn
+                status={status}
+                onAddTask={onAddTask}
+                onMoveTask={onMoveTask}
+                draggingTaskId={draggingTaskId}
+                onDragStart={setDraggingTaskId}
+                onDragEnd={() => setDraggingTaskId(null)}
+                tasks={tasks
+                  .filter((task) => task.statusId === status.id)
+                  .sort((a, b) => a.position - b.position)}
+              />
+            </div>
           ))}
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-brand-primary/15 p-8 text-center">
-          <div><p className="text-sm font-medium">Your board is ready</p><p className="mt-1 text-xs text-text/50">Statuses and tasks for {name} will appear here.</p></div>
+          <div>
+            <p className="text-sm font-medium">Your board is ready</p>
+            <p className="mt-1 text-xs text-text/50">
+              Statuses and tasks for {name} will appear here.
+            </p>
+          </div>
         </div>
       )}
     </Paper>

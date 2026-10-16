@@ -15,6 +15,7 @@ export type TContainer = {
   visibility: TVisibility;
   archivedAt: string | null; // soft-delete flag (descendants are hidden implicitly)
 }
+export type TContainerUpdate = { id: TId; name?: string; position?: number };
 
 export type TStatus  = {
   id: TId;
