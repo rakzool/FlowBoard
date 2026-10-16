@@ -1,4 +1,5 @@
 import Paper from "../DesignComponents/Paper";
+import Button from "../DesignComponents/Button";
 
 export default function ErrorFallback() {
   return (
@@ -8,12 +9,13 @@ export default function ErrorFallback() {
         <p className="text-sm opacity-80 mb-4">
           An unexpected error occurred in the application view.
         </p>
-        <button
+        <Button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-lg bg-brand-primary text-white font-medium hover:opacity-95 cursor-pointer"
+          variant="primary"
+          className="cursor-pointer px-4 py-2"
         >
           Reload Application
-        </button>
+        </Button>
       </Paper>
     </Paper>
   );
