@@ -15,7 +15,11 @@ export type TContainer = {
   visibility: TVisibility;
   archivedAt: string | null; // soft-delete flag (descendants are hidden implicitly)
 }
-export type TContainerUpdate = { id: TId; name?: string; position?: number };
+export type TContainerAccessDetails = { visibility: TVisibility; allowedUserIds: TId[]; deniedUserIds: TId[] };
+export type TContainerCreate = { container: TContainer; userIds?: TId[]; deniedUserIds?: TId[]; currentUserId?: TId };
+export type TContainerUpdate = { id: TId; name?: string; position?: number; currentUserId?: TId };
+export type TContainerAccessUpdate = TContainerAccessDetails & { resourceId: TId; currentUserId?: TId };
+export type TTaskCreate = { task: TTask; currentUserId?: TId };
 
 export type TStatus  = {
   id: TId;

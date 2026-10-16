@@ -1,28 +1,22 @@
 import type { TBoard } from "../../hooks/useSideBar";
 import Button from "../DesignComponents/Button";
 import ContainerActions from "./ContainerActions";
-import withSuspense from "../../utils/withSuspense";
-const EditItemForm = withSuspense(() => import("./EditItemForm"));
 
 type TBoardsProps = {
   boards: TBoard[];
   onSelect: (board: TBoard) => void;
-  editingId: string | null;
   startEditing: (id: string) => void;
-  cancelEditing: () => void;
-  edit: (id: string, name: string) => void;
   remove: (id: string) => void;
+  canManage: boolean;
 };
 const boardIcon = "▦";
 
 export default function Boards({
   boards,
   onSelect,
-  editingId,
   startEditing,
-  cancelEditing,
-  edit,
   remove,
+  canManage,
 }: TBoardsProps) {
   return (
     <div className="ml-10 space-y-0.5 border-l border-brand-primary/10 pl-2">
@@ -40,22 +34,14 @@ export default function Boards({
               </span>
               <span className="truncate">{board.name}</span>
             </Button>
-            <ContainerActions
+            {canManage && <ContainerActions
               name={board.name}
               onEdit={() => startEditing(board.id)}
               onDelete={() => {
                 if (window.confirm(`Delete ${board.name}?`)) remove(board.id);
               }}
-            />
+            />}
           </div>
-          {editingId === board.id && (
-            <EditItemForm
-              key={editingId}
-              value={board.name}
-              onSubmit={(name) => edit(board.id, name)}
-              onCancel={cancelEditing}
-            />
-          )}
         </div>
       ))}
     </div>

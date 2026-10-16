@@ -29,7 +29,9 @@ export default function TaskCreateModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TPriority>("normal");
-  const [assignees, setAssignees] = useState("");
+  const [assigneeId, setAssigneeId] = useState("");
+  const users = useAppSelector((state) => state.board.users);
+  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [dueDate, setDueDate] = useState("");
 
   const submit = (event: { preventDefault: () => void }) => {
@@ -38,23 +40,23 @@ export default function TaskCreateModal({
     const statusTasks = tasks.filter((task) => task.statusId === status.id);
     dispatch(
       addTask({
-        id: `task-${Date.now()}`,
-        primaryListId: listId,
-        parentTaskId: null,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        statusId: status.id,
-        priority,
-        assigneeIds: assignees
-          .split(",")
-          .map((assignee) => assignee.trim())
-          .filter(Boolean),
-        dueDate: dueDate
-          ? new Date(`${dueDate}T00:00:00.000Z`).toISOString()
-          : null,
-        position: statusTasks.length,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        currentUserId,
+        task: {
+          id: `task-${Date.now()}`,
+          primaryListId: listId,
+          parentTaskId: null,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          statusId: status.id,
+          priority,
+          assigneeIds: assigneeId ? [assigneeId] : [],
+          dueDate: dueDate
+            ? new Date(`${dueDate}T00:00:00.000Z`).toISOString()
+            : null,
+          position: statusTasks.length,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
       }),
     );
     onClose();
@@ -94,10 +96,14 @@ export default function TaskCreateModal({
         />
         <DatePicker label="Due date" value={dueDate} onChange={setDueDate} />
         <div className="sm:col-span-2">
-          <Input
-            placeholder="Assignees (comma separated)"
-            value={assignees}
-            changeHandler={(event) => setAssignees(event.target.value)}
+          <Select
+            label="Assignee"
+            value={assigneeId}
+            options={[
+              { value: "", label: "Unassigned" },
+              ...users.map((user) => ({ value: user.id, label: user.name })),
+            ]}
+            onChange={setAssigneeId}
           />
         </div>
         <div className="flex justify-end gap-2 pt-2 sm:col-span-2">

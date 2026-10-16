@@ -1,28 +1,94 @@
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../../hooks/useTheme";
+import { useAppDispatch } from "../../store/hooks";
+import { selectList, switchUser } from "../../store/reducer/sessionReducer";
 import Button from "../DesignComponents/Button";
+import Toggle from "../DesignComponents/Toggle";
+import useAccessControl from "../../hooks/useAccessControl";
 
-const AppHeader = () => {
+export default function AppHeader() {
   const { theme, toggleTheme } = useTheme();
+  const { users, currentUser, currentUserId, getFirstAccessibleBoard } =
+    useAccessControl();
+  const dispatch = useAppDispatch();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const chooseUser = (userId: string) => {
+    const firstBoardId = getFirstAccessibleBoard(userId);
+    dispatch(switchUser(userId));
+    dispatch(selectList(firstBoardId));
+    setOpen(false);
+  };
 
   return (
-    <header className="flex justify-between items-center px-6 h-16 w-full border-b border-brand-primary/10 bg-surface shrink-0">
+    <header className="flex h-16 w-full shrink-0 items-center justify-between border-b border-brand-primary/10 bg-surface px-6">
       <div className="text-lg font-bold tracking-wide">FlowBoard</div>
-      <div className="flex items-center gap-4">
+      <div ref={menuRef} className="relative">
         <Button
-          onClick={toggleTheme}
-          variant="primary"
-          className="cursor-pointer px-3 py-1.5 text-xs"
+          type="button"
+          variant="ghost"
+          aria-label="Open account menu"
+          aria-expanded={open}
+          onClick={() => setOpen((isOpen) => !isOpen)}
+          className="rounded-full p-0.5"
         >
-          {theme === "light" ? "Dark" : "Light"}
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary/20 text-xs font-semibold text-brand-primary">
+            {currentUser?.name.slice(0, 2).toUpperCase() ?? "??"}
+          </span>
         </Button>
-        <div className="flex items-center gap-2.5 pl-3 border-l border-brand-primary/10">
-          <div className="w-8 h-8 rounded-full bg-brand-primary/20 flex items-center justify-center font-semibold text-xs text-brand-primary">
-            RK
+        {open && (
+          <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-brand-primary/10 bg-surface p-2 shadow-xl">
+            <div className="border-b border-brand-primary/10 px-3 py-2">
+              <p className="text-sm font-semibold">
+                {currentUser?.name ?? "User"}
+              </p>
+              <p className="text-xs text-text/50">
+                {currentUser?.role ?? "member"}
+              </p>
+            </div>
+            <div className="border-b border-brand-primary/10 py-2">
+              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-text/45">
+                Users
+              </p>
+              {users.map((user) => (
+                <Button
+                  key={user.id}
+                  type="button"
+                  variant="ghost"
+                  onClick={() => chooseUser(user.id)}
+                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm"
+                >
+                  <span>{user.name}</span>
+                  <span className="text-xs text-text/45">
+                    {user.id === currentUserId ? "Current" : user.role}
+                  </span>
+                </Button>
+              ))}
+            </div>
+            <div className="p-3">
+              <p className="pb-2 text-[11px] font-semibold uppercase tracking-wider text-text/45">
+                Settings
+              </p>
+              <Toggle
+                label="Dark theme"
+                checked={theme === "dark"}
+                onChange={toggleTheme}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
-};
-
-export default AppHeader;
+}

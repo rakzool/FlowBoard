@@ -1,5 +1,6 @@
 import type { DragEvent } from "react";
-import type { TTask } from "../../store/types/common.types";
+import type { TTask, TUser } from "../../store/types/common.types";
+import TaskAssignees from "./TaskAssignees";
 
 type TTaskCardProps = {
   task: TTask;
@@ -9,6 +10,9 @@ type TTaskCardProps = {
   onDragEnd?: () => void;
   onDragOver?: (event: DragEvent<HTMLElement>) => void;
   onDrop?: (event: DragEvent<HTMLElement>) => void;
+  users: TUser[];
+  dueDateLabel: string;
+  onOpen: () => void;
 };
 
 export default function TaskCard({
@@ -19,6 +23,9 @@ export default function TaskCard({
   onDragEnd,
   onDragOver,
   onDrop,
+  users,
+  dueDateLabel,
+  onOpen,
 }: TTaskCardProps) {
   const priorityClass = {
     urgent: "text-red-500",
@@ -40,7 +47,7 @@ export default function TaskCard({
       <div className="mb-3 flex items-start justify-between gap-2">
         <h3 className="text-sm font-medium leading-5">{task.title}</h3>
         <span
-          className={`shrink-0 text-[10px] font-semibold uppercase ${priorityClass}`}
+          className={`shrink-0 rounded-full bg-brand-primary/10 px-2 py-1 text-[10px] font-semibold uppercase ${priorityClass}`}
         >
           {task.priority}
         </span>
@@ -48,13 +55,15 @@ export default function TaskCard({
       {task.description && (
         <p className="text-xs leading-5 text-text/55">{task.description}</p>
       )}
-      <div className="mt-4 flex items-center justify-between text-[11px] text-text/45">
-        <span>
-          {task.assigneeIds.length
-            ? `Assigned to ${task.assigneeIds.join(", ")}`
-            : "Unassigned"}
-        </span>
-        <span aria-hidden="true">•••</span>
+      <div className="mt-4 flex items-center justify-between gap-2 text-[11px]">
+        <TaskAssignees assigneeIds={task.assigneeIds} users={users} />
+        <button
+          type="button"
+          onClick={onOpen}
+          className="shrink-0 text-text/45 hover:text-brand-primary"
+        >
+          {dueDateLabel}
+        </button>
       </div>
     </article>
   );
