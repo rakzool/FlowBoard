@@ -1,4 +1,10 @@
-import type { TContainer, TGrant, TStatus, TTask, TUser } from "./types/common.types";
+import type {
+  TContainer,
+  TGrant,
+  TStatus,
+  TTask,
+  TUser,
+} from "./types/common.types";
 
 const users: TUser[] = [
   { id: "alice", name: "Alice", role: "admin" },
@@ -99,7 +105,8 @@ const containers: TContainer[] = [
   },
 ];
 containers.forEach((container) => {
-  if (container.type === "folder" || container.type === "list") container.visibility = "public";
+  if (container.type === "folder" || container.type === "list")
+    container.visibility = "public";
 });
 const statuses: TStatus[] = [
   {
@@ -213,6 +220,7 @@ const tasks: TTask[] = [
     position: 0,
     createdAt: "2026-10-15T09:00:00.000Z",
     updatedAt: "2026-10-16T09:00:00.000Z",
+    archivedAt: null,
   },
   {
     id: "task-2",
@@ -227,6 +235,7 @@ const tasks: TTask[] = [
     position: 0,
     createdAt: "2026-10-15T10:00:00.000Z",
     updatedAt: "2026-10-16T10:00:00.000Z",
+    archivedAt: null,
   },
   {
     id: "task-3",
@@ -241,11 +250,22 @@ const tasks: TTask[] = [
     position: 0,
     createdAt: "2026-10-14T10:00:00.000Z",
     updatedAt: "2026-10-15T10:00:00.000Z",
+    archivedAt: null,
   },
 ];
 const grants: TGrant[] = [
-  { id: "engineering:bob", resourceId: "engineering", userId: "bob", mode: "allow" },
-  { id: "product:carol", resourceId: "product", userId: "carol", mode: "allow" },
+  {
+    id: "engineering:bob",
+    resourceId: "engineering",
+    userId: "bob",
+    mode: "allow",
+  },
+  {
+    id: "product:carol",
+    resourceId: "product",
+    userId: "carol",
+    mode: "allow",
+  },
 ];
 
 export function buildSeedState() {

@@ -19,6 +19,7 @@ type TBoardListProps = {
   currentUserId: string;
   onAddTask: (status: TStatus) => void;
   onOpenTask: (task: TTask) => void;
+  subtaskCounts: Record<string, number>;
 };
 type TSortKey = "dueDate" | "priority";
 
@@ -43,6 +44,7 @@ export default function BoardList({
   currentUserId,
   onAddTask,
   onOpenTask,
+  subtaskCounts,
 }: TBoardListProps) {
   const dispatch = useAppDispatch();
   const [sortKey, setSortKey] = useState<TSortKey>("dueDate");
@@ -158,6 +160,7 @@ export default function BoardList({
                       users={users}
                       dueDateLabel={formatDueDate(task.dueDate)}
                       onOpen={() => onOpenTask(task)}
+                      subtaskCount={subtaskCounts[task.id] ?? 0}
                     />
                   ))
                 ) : (

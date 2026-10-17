@@ -20,6 +20,11 @@ export type TContainerCreate = { container: TContainer; userIds?: TId[]; deniedU
 export type TContainerUpdate = { id: TId; name?: string; position?: number; currentUserId?: TId };
 export type TContainerAccessUpdate = TContainerAccessDetails & { resourceId: TId; currentUserId?: TId };
 export type TTaskCreate = { task: TTask; currentUserId?: TId };
+export type TTaskUpdate = {
+  id: TId;
+  changes: Partial<Pick<TTask, "title" | "description" | "priority" | "assigneeIds" | "dueDate" | "statusId">>;
+  currentUserId?: TId;
+};
 
 export type TStatus  = {
   id: TId;
@@ -43,6 +48,7 @@ export type TTask = {
   position: number; // ordering within a status column
   createdAt: string;
   updatedAt: string;
+  archivedAt: string | null;
 }
 
 export type TUser  = {

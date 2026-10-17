@@ -4,7 +4,13 @@ import Button from "../DesignComponents/Button";
 import withSuspense from "../../utils/withSuspense";
 
 const TaskCard = withSuspense(() => import("./TaskCard"));
-const formatDueDate = (value: string | null) => value ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(value)) : "No due date";
+const formatDueDate = (value: string | null) =>
+  value
+    ? new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+      }).format(new Date(value))
+    : "No due date";
 
 type TBoardColumnProps = {
   status: TStatus;
@@ -16,6 +22,7 @@ type TBoardColumnProps = {
   onDragEnd: () => void;
   users: TUser[];
   onOpenTask: (task: TTask) => void;
+  subtaskCounts: Record<string, number>;
 };
 
 export default function BoardColumn({
@@ -28,6 +35,7 @@ export default function BoardColumn({
   onDragEnd,
   users,
   onOpenTask,
+  subtaskCounts,
 }: TBoardColumnProps) {
   const dotClass =
     status.category === "done"
@@ -85,6 +93,7 @@ export default function BoardColumn({
               users={users}
               dueDateLabel={formatDueDate(task.dueDate)}
               onOpen={() => onOpenTask(task)}
+              subtaskCount={subtaskCounts[task.id] ?? 0}
             />
           ))
         ) : (
