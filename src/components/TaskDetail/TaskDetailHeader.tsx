@@ -1,6 +1,7 @@
 import Button from "../DesignComponents/Button";
 import Input from "../DesignComponents/Input";
 import type { TTaskDetailFieldProps } from "../../types/taskDetail.types";
+import useAccessControl from "../../hooks/useAccessControl";
 
 export default function TaskDetailHeader({
   task,
@@ -9,8 +10,8 @@ export default function TaskDetailHeader({
   onTitleChange,
   onEdit,
   onSave,
-  canEdit,
 }: TTaskDetailFieldProps) {
+  const { canEditTask } = useAccessControl();
   return (
     <div className="flex items-start justify-between gap-4">
       {editing === "title" ? (
@@ -34,7 +35,7 @@ export default function TaskDetailHeader({
       ) : (
         <h3 className="text-2xl font-semibold tracking-tight">{task.title}</h3>
       )}
-      {canEdit && (
+      {canEditTask(task) && (
         <Button
           type="button"
           variant="subtle"

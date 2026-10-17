@@ -9,7 +9,7 @@ type TBoardViewTabsProps = {
 export default function BoardViewTabs({ view, onChange }: TBoardViewTabsProps) {
   return (
     <div
-      className="flex gap-1 border-b border-brand-primary/10 px-6"
+      className="flex gap-1 border-b border-border px-5"
       role="tablist"
       aria-label="Board view"
     >
@@ -21,7 +21,7 @@ export default function BoardViewTabs({ view, onChange }: TBoardViewTabsProps) {
           aria-selected={view === option}
           variant="ghost"
           onClick={() => onChange(option)}
-          className={`rounded-none border-b-2 px-3 py-3 text-sm ${view === option ? "border-brand-primary text-brand-primary" : "border-transparent text-text/50"}`}
+          className={`rounded-none border-b-2 px-3 py-2.5 text-sm ${view === option ? "border-brand-primary text-brand-primary" : "border-transparent text-muted"}`}
         >
           {option === "board" ? "Kanban board" : "List"}
         </Button>

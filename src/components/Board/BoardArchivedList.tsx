@@ -1,6 +1,7 @@
 import Paper from "../DesignComponents/Paper";
 import TaskCard from "./TaskCard";
 import type { TTask, TUser } from "../../store/types/common.types";
+import { formatShortDueDate } from "../../utils/taskFormatting";
 
 type TBoardArchivedListProps = {
   tasks: TTask[];
@@ -8,14 +9,6 @@ type TBoardArchivedListProps = {
   subtaskCounts: Record<string, number>;
   onOpenTask: (task: TTask) => void;
 };
-
-const formatDueDate = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat(undefined, {
-        month: "short",
-        day: "numeric",
-      }).format(new Date(value))
-    : "No due date";
 
 export default function BoardArchivedList({
   tasks,
@@ -27,9 +20,9 @@ export default function BoardArchivedList({
     (a, b) => Date.parse(b.archivedAt ?? "") - Date.parse(a.archivedAt ?? ""),
   );
   return (
-    <Paper className="min-w-[28rem] rounded-xl border border-brand-primary/10 p-4">
-      <div className="mb-4 border-b border-brand-primary/10 pb-3">
-        <h2 className="text-lg font-semibold">Archived tickets</h2>
+    <Paper className="min-w-[28rem] rounded-panel border border-border p-3">
+      <div className="mb-3 border-b border-border pb-3">
+        <h2 className="text-base font-semibold">Archived tickets</h2>
         <p className="mt-1 text-xs text-text/50">
           Tickets archived from this board.
         </p>
@@ -41,7 +34,7 @@ export default function BoardArchivedList({
               key={task.id}
               task={task}
               users={users}
-              dueDateLabel={formatDueDate(task.dueDate)}
+              dueDateLabel={formatShortDueDate(task.dueDate)}
               subtaskCount={subtaskCounts[task.id] ?? 0}
               onOpen={() => onOpenTask(task)}
             />

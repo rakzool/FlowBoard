@@ -21,8 +21,6 @@ export type TTaskDetailModalProps = {
   statuses: TStatus[];
   tasks: TTask[];
   users: TUser[];
-  currentUserId: string;
-  canEdit: boolean;
   isArchived: boolean;
   onArchive: (task: TTask) => void;
   onUnarchive: (task: TTask) => void;
@@ -63,9 +61,7 @@ export type TTaskDetailFieldProps = Pick<
   | "description"
   | "onTitleChange"
   | "onDescriptionChange"
-> & {
-  canEdit: boolean;
-};
+>;
 
 export type TTaskDetailMetadataProps = Pick<
   TTaskDetailEditorProps,
@@ -85,7 +81,6 @@ export type TTaskDetailMetadataProps = Pick<
   | "onEdit"
   | "onSave"
 > & {
-  canEdit: boolean;
   isArchived: boolean;
   onArchive: (task: TTask) => void;
   onUnarchive: (task: TTask) => void;
@@ -95,7 +90,6 @@ export type TTaskDetailSubtasksProps = Pick<
   TTaskDetailEditorProps,
   | "task"
   | "tasks"
-  | "canEdit"
   | "isArchived"
   | "onCreateSubtask"
   | "onOpenSubtask"

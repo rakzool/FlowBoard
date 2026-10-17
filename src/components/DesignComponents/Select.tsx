@@ -13,12 +13,12 @@ export default function Select({
   onChange,
 }: TSelectProps) {
   return (
-    <label className="flex w-full flex-col gap-1 text-sm text-text/65">
+    <label className="flex w-full flex-col gap-1 text-sm text-muted">
       <span>{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full rounded-lg border border-brand-primary/15 bg-surface px-3 text-sm text-text outline-none focus:border-brand-primary"
+        className="h-10 w-full rounded-control border border-border bg-surface px-3 text-sm text-text outline-none focus:border-brand-primary"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

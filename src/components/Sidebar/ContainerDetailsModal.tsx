@@ -2,14 +2,13 @@ import { useState } from "react";
 import Button from "../DesignComponents/Button";
 import Input from "../DesignComponents/Input";
 import Modal from "../DesignComponents/Modal";
-import MultiInput, {
-  type TMultiInputOption,
-} from "../DesignComponents/MultiInput";
+import MultiInput from "../DesignComponents/MultiInput";
 import Select from "../DesignComponents/Select";
 import type {
   TContainerAccessDetails,
   TVisibility,
 } from "../../store/types/common.types";
+import useAccessControl from "../../hooks/useAccessControl";
 
 type TContainerDetailsModalProps = {
   title: string;
@@ -17,8 +16,6 @@ type TContainerDetailsModalProps = {
   visibility?: TVisibility;
   allowedUserIds?: string[];
   deniedUserIds?: string[];
-  userOptions?: TMultiInputOption[];
-  canManageAccess?: boolean;
   onSubmit: (name: string, accessDetails?: TContainerAccessDetails) => void;
   onClose: () => void;
 };
@@ -29,16 +26,19 @@ export default function ContainerDetailsModal({
   visibility: initialVisibility = "private",
   allowedUserIds = [],
   deniedUserIds = [],
-  userOptions = [],
-  canManageAccess = false,
   onSubmit,
   onClose,
 }: TContainerDetailsModalProps) {
+  const { users, canManageContainers } = useAccessControl();
+  const userOptions = users.map((user) => ({
+    value: user.id,
+    label: user.name,
+  }));
   const [name, setName] = useState(initialName);
   const [visibility, setVisibility] = useState<TVisibility>(initialVisibility);
   const [allowedUsers, setAllowedUsers] = useState(allowedUserIds);
   const [deniedUsers, setDeniedUsers] = useState(deniedUserIds);
-  const hasAccessSettings = canManageAccess && userOptions.length > 0;
+  const hasAccessSettings = canManageContainers && userOptions.length > 0;
   return (
     <Modal open title={title} onClose={onClose}>
       <form

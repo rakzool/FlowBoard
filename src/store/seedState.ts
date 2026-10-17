@@ -274,6 +274,14 @@ export function buildSeedState() {
       currentUserId: "alice",
       selectedListId: "list-backlog" as string | null,
     },
-    board: { containers, statuses, tasks, users, grants, lastError: null },
+    board: {
+      containers,
+      statuses,
+      tasks,
+      users,
+      grants,
+      lastError: null,
+      lastFeedback: null,
+    },
   };
 }

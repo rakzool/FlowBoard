@@ -4,11 +4,12 @@ import Button from "../DesignComponents/Button";
 import useSideBar from "../../hooks/useSideBar";
 import withSuspense from "../../utils/withSuspense";
 import AddForm from "./AddForm";
-const FolderTree = withSuspense(() => import("./FolderTree"));
+import { WORKSPACE_ICON } from "../../constants/sidebar.constants";
 import ContainerDetailsModal from "./ContainerDetailsModal";
 import ContainerActions from "./ContainerActions";
+import useAccessControl from "../../hooks/useAccessControl";
 
-const workspaceIcon = "◆";
+const FolderTree = withSuspense(() => import("./FolderTree"));
 
 export default function Sidebar() {
   const {
@@ -26,54 +27,56 @@ export default function Sidebar() {
     edit,
     remove,
     selectBoard,
-    users,
-    canManage,
-    canCreateSpace,
-    canCreateInSpace,
-    getAccessUserIds,
-    lastError,
   } = useSideBar();
+
+  const { canManageContainers, canCreateSpace } = useAccessControl();
   const beginSpace = () => startAdding({ type: "space" });
 
   return (
-    <aside className="flex h-dvh w-72 shrink-0 flex-col border-r border-brand-primary/10 bg-surface">
-      <nav className="flex-1 overflow-y-auto p-4">
+    <aside className="flex h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-surface">
+      <nav className="flex-1 overflow-y-auto p-3">
         <div className="mb-2 flex items-center justify-between px-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text/45">
+          <p className="text-caption font-semibold uppercase tracking-wider text-muted">
             Workspace
           </p>
-          {canCreateSpace && <Button
-            type="button"
-            variant="subtle"
-            aria-label="Create space"
-            title="Create space"
-            onClick={beginSpace}
-            className="px-1.5 py-0.5 text-base leading-none"
-          >
-            +
-          </Button>}
+          {canCreateSpace && (
+            <Button
+              type="button"
+              variant="subtle"
+              aria-label="Create space"
+              title="Create space"
+              onClick={beginSpace}
+              className="px-1.5 py-0.5 text-base leading-none"
+            >
+              +
+            </Button>
+          )}
         </div>
         <Accordion>
           <AccordionItem
             title="FlowBoard workspace"
             defaultOpen
-            icon={<span className="text-xs">{workspaceIcon}</span>}
+            icon={<span className="text-xs">{WORKSPACE_ICON}</span>}
             actions={
               <div className="flex items-center">
-                {canManage && <ContainerActions
-                  name="workspace"
-                  onEdit={() => startEditing("workspace-flowboard")}
-                />}
-                {canCreateSpace && <Button
-                  type="button"
-                  variant="subtle"
-                  aria-label="Create space"
-                  title="Create space"
-                  onClick={beginSpace}
-                  className="px-1.5 py-0.5 text-base leading-none"
-                >
-                  +
-                </Button>}
+                {canManageContainers && (
+                  <ContainerActions
+                    name="workspace"
+                    onEdit={() => startEditing("workspace-flowboard")}
+                  />
+                )}
+                {canCreateSpace && (
+                  <Button
+                    type="button"
+                    variant="subtle"
+                    aria-label="Create space"
+                    title="Create space"
+                    onClick={beginSpace}
+                    className="px-1.5 py-0.5 text-base leading-none"
+                  >
+                    +
+                  </Button>
+                )}
               </div>
             }
           >
@@ -93,32 +96,27 @@ export default function Sidebar() {
                 cancelEditing={cancelEditing}
                 edit={edit}
                 remove={remove}
-                canManage={canManage}
-                userOptions={users.map((user) => ({ value: user.id, label: user.name }))}
-                getAccessUserIds={getAccessUserIds}
-                canCreateItems={canCreateInSpace(space)}
               />
             ))}
             {!spaces.length && (
               <p className="py-2 pl-7 text-xs text-text/40">No spaces yet</p>
             )}
           </AccordionItem>
-          </Accordion>
-          {editingId === "workspace-flowboard" && (
-            <ContainerDetailsModal
-              key={editingId}
-              title="Edit workspace"
-              name="FlowBoard workspace"
-              onSubmit={(name) => edit("workspace-flowboard", name)}
-              onClose={cancelEditing}
-            />
-          )}
-          {adding?.type === "space" && (
-            <AddForm target={adding} create={create} cancel={cancelAdding} userOptions={users.map((user) => ({ value: user.id, label: user.name }))} canManageAccess={canManage} />
-          )}
+        </Accordion>
+        {editingId === "workspace-flowboard" && (
+          <ContainerDetailsModal
+            key={editingId}
+            title="Edit workspace"
+            name="FlowBoard workspace"
+            onSubmit={(name) => edit("workspace-flowboard", name)}
+            onClose={cancelEditing}
+          />
+        )}
+        {adding?.type === "space" && (
+          <AddForm target={adding} create={create} cancel={cancelAdding} />
+        )}
       </nav>
-      <div className="border-t border-brand-primary/10 px-4 py-3 text-xs text-text/50">
-        {lastError && <p role="alert" className="mb-2 rounded-lg bg-red-500/10 px-2 py-1 text-red-600">{lastError.message}</p>}
+      <div className="border-t border-border px-3 py-2.5 text-xs text-muted">
         {selectedBoard
           ? `Viewing ${selectedBoard.name}`
           : "Select a board to get started"}
