@@ -1,16 +1,18 @@
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import { ErrorBoundry } from "./components/ErrorBoundry/ErrorBoundry";
 import PageLoader from "./components/PageLoader/pageLoader";
 
+import Layout from "./pages/layout";
 
-const Dashboard = lazy(() => import("./pages/DashBoard/DashBoard"));
+
+
 
 function App() {
   return (
     <>
       <ErrorBoundry>
-        <Suspense fallback={<PageLoader/>}>
-          <Dashboard />
+        <Suspense fallback={<PageLoader />}>
+          <Layout />
         </Suspense>
       </ErrorBoundry>
     </>

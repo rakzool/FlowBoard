@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { ThemeContext } from "./ThemeContext";
 
 type TThemeProviderProps = {
@@ -13,7 +13,7 @@ export function ThemeProvider({children}:TThemeProviderProps) {
         return localStorage.getItem("theme") || 'light';
     });
 
-    useEffect(()=>{
+    useLayoutEffect(()=>{
         const root = document.documentElement;
         if(theme === 'dark'){
             root.classList.add("dark");

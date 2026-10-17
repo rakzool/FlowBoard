@@ -8,7 +8,10 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   { ignores: ["dist", "node_modules"] },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommendedTypeChecked.map((config) => ({
+    ...config,
+    files: ["**/*.{ts,tsx}"],
+  })),
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -31,6 +34,14 @@ export default defineConfig([
 
       //custome rules for ES-lint 
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: ['typeAlias', 'interface'],
+          format: ['PascalCase'],
+          custom: { regex: '^T[A-Z]', match: true },
+        },
+      ],
     }
   },
 ]);
