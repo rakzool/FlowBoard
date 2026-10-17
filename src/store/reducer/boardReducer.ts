@@ -12,6 +12,7 @@ import type {
   TGrant,
   TUser,
   TErrorCode,
+  TBoardFeedback,
 } from "../types/common.types";
 import { canAccessContainer } from "../access";
 
@@ -22,6 +23,7 @@ export type TBoardState = {
   users: TUser[];
   grants: TGrant[];
   lastError: { code: TErrorCode; message: string } | null;
+  lastFeedback: TBoardFeedback | null;
 };
 
 const initialState: TBoardState = {
@@ -31,13 +33,31 @@ const initialState: TBoardState = {
   users: [],
   grants: [],
   lastError: null,
+  lastFeedback: null,
 };
 
+const setFeedback = (
+  state: TBoardState,
+  kind: TBoardFeedback["kind"],
+  message: string,
+) => {
+  state.lastFeedback = {
+    id: (state.lastFeedback?.id ?? 0) + 1,
+    kind,
+    message,
+  };
+};
 const setError = (state: TBoardState, message: string) => {
   state.lastError = { code: "FORBIDDEN", message };
+  setFeedback(state, "error", message);
 };
-const clearError = (state: TBoardState) => {
+const setValidationError = (state: TBoardState, message: string) => {
+  state.lastError = { code: "VALIDATION", message };
+  setFeedback(state, "error", message);
+};
+const setSuccess = (state: TBoardState, message: string) => {
   state.lastError = null;
+  setFeedback(state, "success", message);
 };
 const taskTree = (state: TBoardState, rootId: string) => {
   const ids = new Set([rootId]);
@@ -171,7 +191,10 @@ const boardSlice = createSlice({
         );
         return;
       }
-      clearError(state);
+      setSuccess(
+        state,
+        `${container.type === "list" ? "Board" : container.type[0].toUpperCase() + container.type.slice(1)} created successfully.`,
+      );
       state.containers.push(container);
       if (userIds.length) {
         userIds
@@ -209,7 +232,7 @@ const boardSlice = createSlice({
         setError(state, "403: Only administrators can edit containers.");
         return;
       }
-      clearError(state);
+      setSuccess(state, "Container updated successfully.");
       if (action.payload.name !== undefined && action.payload.name.trim())
         container.name = action.payload.name.trim();
       if (action.payload.position !== undefined && action.payload.position >= 0)
@@ -228,7 +251,7 @@ const boardSlice = createSlice({
         setError(state, "403: Only administrators can change permissions.");
         return;
       }
-      clearError(state);
+      setSuccess(state, "Container permissions updated successfully.");
       resource.visibility = action.payload.visibility;
       state.grants = state.grants.filter(
         (grant) => grant.resourceId !== resource.id,
@@ -267,7 +290,7 @@ const boardSlice = createSlice({
         setError(state, "403: Only administrators can delete containers.");
         return;
       }
-      clearError(state);
+      setSuccess(state, "Container deleted successfully.");
       const removedIds = new Set<string>([action.payload.id]);
       let changed = true;
       while (changed) {
@@ -307,10 +330,7 @@ const boardSlice = createSlice({
     addTask: (state, action: PayloadAction<TTaskCreate>) => {
       const { task, currentUserId } = action.payload;
       if (task.parentTaskId === task.id) {
-        state.lastError = {
-          code: "VALIDATION",
-          message: "A task cannot be its own parent.",
-        };
+        setValidationError(state, "A task cannot be its own parent.");
         return;
       }
       if (!canMutate(state, currentUserId, task.primaryListId)) {
@@ -320,9 +340,15 @@ const boardSlice = createSlice({
         );
         return;
       }
-      clearError(state);
-      if (hasValidTaskShape(state, task))
-        state.tasks.push({
+      if (!hasValidTaskShape(state, task)) {
+        setValidationError(state, "Task details are not valid.");
+        return;
+      }
+      setSuccess(
+        state,
+        `${task.parentTaskId ? "Subtask" : "Task"} created successfully.`,
+      );
+      state.tasks.push({
           ...task,
           title: task.title.trim(),
         });
@@ -343,13 +369,10 @@ const boardSlice = createSlice({
         (nextStatus && nextStatus.listId !== task.primaryListId) ||
         !hasValidTaskShape(state, nextTask)
       ) {
-        state.lastError = {
-          code: "VALIDATION",
-          message: "Task changes are not valid.",
-        };
+        setValidationError(state, "Task changes are not valid.");
         return;
       }
-      clearError(state);
+      setSuccess(state, "Task updated successfully.");
       const previousStatusId = task.statusId;
       Object.assign(task, changes, {
         title: changes.title?.trim() ?? task.title,
@@ -396,7 +419,7 @@ const boardSlice = createSlice({
         );
         return;
       }
-      clearError(state);
+      setSuccess(state, "Task archived successfully.");
       const archivedAt = new Date().toISOString();
       taskTree(state, task.id).forEach((item) => {
         item.archivedAt = archivedAt;
@@ -417,7 +440,7 @@ const boardSlice = createSlice({
         );
         return;
       }
-      clearError(state);
+      setSuccess(state, "Task restored successfully.");
       const root = task.parentTaskId
         ? (state.tasks.find((item) => item.id === task.parentTaskId) ?? task)
         : task;
@@ -516,6 +539,14 @@ const boardSlice = createSlice({
         item.position = index;
       });
       task.updatedAt = new Date().toISOString();
+      setSuccess(state, "Task moved successfully.");
+    },
+    reportBoardError: (
+      state,
+      action: PayloadAction<{ code: TErrorCode; message: string }>,
+    ) => {
+      state.lastError = action.payload;
+      setFeedback(state, "error", action.payload.message);
     },
     clearBoardError: (state) => {
       state.lastError = null;
@@ -533,6 +564,7 @@ export const {
   archiveTask,
   unarchiveTask,
   moveTask,
+  reportBoardError,
   clearBoardError,
 } = boardSlice.actions;
 export default boardSlice.reducer;

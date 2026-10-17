@@ -1,16 +1,9 @@
 import type { DragEvent } from "react";
 import type { TStatus, TTask, TUser } from "../../store/types/common.types";
 import Button from "../DesignComponents/Button";
-import withSuspense from "../../utils/withSuspense";
-
-const TaskCard = withSuspense(() => import("./TaskCard"));
-const formatDueDate = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat(undefined, {
-        month: "short",
-        day: "numeric",
-      }).format(new Date(value))
-    : "No due date";
+import TaskCard from "./TaskCard";
+import { STATUS_CATEGORY_CLASSES } from "../../constants/board.constants";
+import { formatShortDueDate } from "../../utils/taskFormatting";
 
 type TBoardColumnProps = {
   status: TStatus;
@@ -37,12 +30,7 @@ export default function BoardColumn({
   onOpenTask,
   subtaskCounts,
 }: TBoardColumnProps) {
-  const dotClass =
-    status.category === "done"
-      ? "bg-emerald-500"
-      : status.category === "active"
-        ? "bg-brand-primary"
-        : "bg-brand-secondary";
+  const dotClass = STATUS_CATEGORY_CLASSES[status.category];
   const handleDrop = (event: DragEvent<HTMLElement>, position: number) => {
     event.preventDefault();
     event.stopPropagation();
@@ -54,13 +42,13 @@ export default function BoardColumn({
     <section
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => handleDrop(event, tasks.length)}
-      className="flex min-w-72 flex-1 flex-col rounded-xl bg-brand-primary/5 p-3"
+      className="flex min-w-64 flex-1 flex-col rounded-panel bg-surface-subtle p-2.5"
     >
-      <header className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <header className="mb-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
           <span className={`h-2 w-2 rounded-full ${dotClass}`} />
           <h2 className="text-sm font-semibold">{status.name}</h2>
-          <span className="rounded-full bg-brand-primary/10 px-2 py-0.5 text-[10px] text-text/55">
+          <span className="rounded-full bg-brand-primary/10 px-1.5 py-0.5 text-caption text-muted">
             {tasks.length}
           </span>
         </div>
@@ -91,7 +79,7 @@ export default function BoardColumn({
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => handleDrop(event, index)}
               users={users}
-              dueDateLabel={formatDueDate(task.dueDate)}
+              dueDateLabel={formatShortDueDate(task.dueDate)}
               onOpen={() => onOpenTask(task)}
               subtaskCount={subtaskCounts[task.id] ?? 0}
             />

@@ -17,9 +17,9 @@ export default function MultiInput({ label, placeholder, value, options, onChang
   const add = (item: string) => { if (!value.includes(item)) onChange([...value, item]); setQuery(""); };
   const remove = (item: string) => onChange(value.filter((current) => current !== item));
   return (
-    <div className="flex w-full flex-col gap-1 text-sm text-text/65">
+    <div className="flex w-full flex-col gap-1 text-sm text-muted">
       <span>{label}</span>
-      <div className="relative rounded-lg border border-brand-primary/15 bg-surface p-2 focus-within:border-brand-primary">
+      <div className="relative rounded-control border border-border bg-surface p-1.5 focus-within:border-brand-primary">
         <div className="flex flex-wrap gap-1">
           {value.map((item) => {
             const option = options.find((candidate) => candidate.value === item);

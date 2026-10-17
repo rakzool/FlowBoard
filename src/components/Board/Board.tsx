@@ -1,18 +1,15 @@
 import { useState } from "react";
 import Paper from "../DesignComponents/Paper";
 import type { TStatus, TTask, TUser } from "../../store/types/common.types";
-import withSuspense from "../../utils/withSuspense";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { moveTask } from "../../store/reducer/boardReducer";
-
-const BoardColumn = withSuspense(() => import("./BoardColumn"));
+import BoardColumn from "./BoardColumn";
 
 type TBoardProps = {
   name: string;
   statuses: TStatus[];
   tasks: TTask[];
   onAddTask: (status: TStatus) => void;
-  currentUserId: string;
   users: TUser[];
   onOpenTask: (task: TTask) => void;
   subtaskCounts: Record<string, number>;
@@ -23,24 +20,24 @@ export default function Board({
   statuses,
   tasks,
   onAddTask,
-  currentUserId,
   users,
   onOpenTask,
   subtaskCounts,
 }: TBoardProps) {
   const dispatch = useAppDispatch();
+  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const onMoveTask = (taskId: string, statusId: string, position: number) => {
     dispatch(moveTask({ taskId, statusId, position, currentUserId }));
     setDraggingTaskId(null);
   };
   return (
-    <Paper className="flex min-h-full min-w-max flex-1 flex-col rounded-xl border border-brand-primary/10 p-4">
-      <div className="mb-4 flex items-center gap-4">
-        <h2 className="text-lg font-semibold">{name}</h2>
+    <Paper className="flex min-h-full min-w-max flex-1 flex-col rounded-panel border border-border p-3">
+      <div className="mb-3 flex items-center gap-3">
+        <h2 className="text-base font-semibold">{name}</h2>
       </div>
       {statuses.length ? (
-        <div className="flex min-h-0 flex-1 gap-4">
+        <div className="flex min-h-0 flex-1 gap-3">
           {statuses.map((status) => (
             <div key={status.id} className="contents">
               <BoardColumn
