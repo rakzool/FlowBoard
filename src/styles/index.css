@@ -6,7 +6,19 @@
   --color-brand-primary: light-dark(#3b82f6, #60a5fa);
   --color-brand-secondary: light-dark(#10b981, #34d399);
   --color-surface: light-dark(#ffffff, #0f172a);
+  --color-surface-subtle: light-dark(#f8fafc, #172235);
+  --color-border: light-dark(#e2e8f0, #26364a);
+  --color-border-strong: light-dark(#cbd5e1, #3a4b61);
   --color-text: light-dark(#1e293b, #f8fafc);
+  --color-muted: light-dark(#64748b, #94a3b8);
+  --color-danger: light-dark(#dc2626, #f87171);
+  --color-danger-surface: light-dark(#fef2f2, #321c25);
+  --spacing-sidebar: 15rem;
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+  --shadow-panel: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.04);
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1rem;
 }
 
 @layer base {
@@ -24,5 +36,11 @@
   
   html.dark {
     color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.875rem;
   }
 }

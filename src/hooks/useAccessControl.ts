@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useAppSelector } from "../store/hooks";
 import { canAccessContainer } from "../store/access";
-import type { TContainer } from "../store/types/common.types";
+import type { TContainer, TTask, TGrantMode } from "../store/types/common.types";
 import {
   selectCurrentUser,
   selectVisibleBoards,
@@ -20,12 +20,27 @@ export default function useAccessControl() {
   const visibleSpaces = useAppSelector(selectVisibleSpaces);
   const visibleFolders = useAppSelector(selectVisibleFolders);
   const visibleBoards = useAppSelector(selectVisibleBoards);
-  const canManage = currentUser?.role === "admin";
+  const canManageContainers = currentUser?.role === "admin";
   const canCreateSpace = Boolean(currentUser);
-  const canAccess = useCallback(
-    (container: TContainer) =>
-      canAccessContainer(currentUser, container.id, allContainers, grants),
+  const canAccessId = useCallback(
+    (containerId: string) =>
+      canAccessContainer(currentUser, containerId, allContainers, grants),
     [allContainers, currentUser, grants],
+  );
+  const canAccess = useCallback(
+    (container: TContainer) => canAccessId(container.id),
+    [canAccessId],
+  );
+  const canEditTask = useCallback(
+    (task: TTask) => canAccessId(task.primaryListId),
+    [canAccessId],
+  );
+  const getAccessUserIds = useCallback(
+    (resourceId: string, mode: TGrantMode) =>
+      grants
+        .filter((grant) => grant.resourceId === resourceId && grant.mode === mode)
+        .map((grant) => grant.userId),
+    [grants],
   );
   const getFirstAccessibleBoard = useCallback(
     (userId: string) => {
@@ -67,9 +82,12 @@ export default function useAccessControl() {
     users,
     currentUser,
     currentUserId,
-    canManage,
+    canManageContainers,
     canCreateSpace,
     canAccess,
+    canAccessId,
+    canEditTask,
+    getAccessUserIds,
     visibleSpaces,
     visibleFolders,
     visibleBoards,

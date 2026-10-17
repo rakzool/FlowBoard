@@ -1,14 +1,16 @@
 import Button from "../DesignComponents/Button";
 import type { TTaskDetailSubtasksProps } from "../../types/taskDetail.types";
+import useAccessControl from "../../hooks/useAccessControl";
 
 export default function TaskDetailSubtasks({
   task,
   tasks,
-  canEdit,
   isArchived,
   onCreateSubtask,
   onOpenSubtask,
 }: TTaskDetailSubtasksProps) {
+  const { canEditTask } = useAccessControl();
+  const canEdit = canEditTask(task);
   const subtasks = tasks
     .filter(
       (item) =>
@@ -17,8 +19,8 @@ export default function TaskDetailSubtasks({
     )
     .sort((a, b) => a.position - b.position);
   return (
-    <div className="rounded-xl border border-brand-primary/10 p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="rounded-panel border border-border p-3">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
         <div>
           <h4 className="text-sm font-semibold">Subtasks</h4>
           <p className="text-xs text-text/45">
@@ -44,7 +46,7 @@ export default function TaskDetailSubtasks({
               type="button"
               variant="ghost"
               onClick={() => onOpenSubtask(subtask)}
-              className="flex w-full items-center justify-between border border-brand-primary/10 px-3 py-2 text-left"
+              className="flex w-full items-center justify-between border border-border px-3 py-2 text-left"
             >
               <span className="truncate">{subtask.title}</span>
               <span className="ml-3 shrink-0 text-xs capitalize text-text/50">

@@ -1,17 +1,13 @@
-import withSuspense from "../../utils/withSuspense";
 import type { TTaskDetailEditorProps } from "../../types/taskDetail.types";
-
-const TaskDetailHeader = withSuspense(() => import("./TaskDetailHeader"));
-const TaskDetailDescription = withSuspense(
-  () => import("./TaskDetailDescription"),
-);
-const TaskDetailSubtasks = withSuspense(() => import("./TaskDetailSubtasks"));
-const TaskDetailMetadata = withSuspense(() => import("./TaskDetailMetadata"));
+import TaskDetailHeader from "./TaskDetailHeader";
+import TaskDetailDescription from "./TaskDetailDescription";
+import TaskDetailSubtasks from "./TaskDetailSubtasks";
+import TaskDetailMetadata from "./TaskDetailMetadata";
 
 export default function TaskDetailContent(props: TTaskDetailEditorProps) {
   return (
-    <div className="grid gap-6 text-sm md:grid-cols-[1.4fr_1fr]">
-      <div className="space-y-5">
+    <div className="grid gap-4 text-sm md:grid-cols-[1.4fr_1fr]">
+      <div className="space-y-4">
         <TaskDetailHeader {...props} />
         <TaskDetailDescription {...props} />
         <TaskDetailSubtasks {...props} />

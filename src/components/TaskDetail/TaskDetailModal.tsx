@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Modal from "../DesignComponents/Modal";
-import withSuspense from "../../utils/withSuspense";
 import { useAppDispatch } from "../../store/hooks";
 import { updateTask } from "../../store/reducer/boardReducer";
+import { useAppSelector } from "../../store/hooks";
+import TaskCreateModal from "./TaskCreateModal";
+import withSuspense from "../../utils/withSuspense";
 import type { TTask } from "../../store/types/common.types";
 import type {
   TTaskDetailModalProps,
@@ -10,10 +12,9 @@ import type {
   TEditingField,
 } from "../../types/taskDetail.types";
 
-const TaskDetailContent = withSuspense(() => import("./TaskDetailContent"));
-const TaskCreateModal = withSuspense(() => import("./TaskCreateModal"));
+import { toDateInputValue } from "../../utils/taskFormatting";
 
-const dateValue = (value: string | null) => (value ? value.slice(0, 10) : "");
+const TaskDetailContent = withSuspense(() => import("./TaskDetailContent"));
 
 export default function TaskDetailModal({
   task,
@@ -21,14 +22,13 @@ export default function TaskDetailModal({
   statuses,
   tasks,
   users,
-  currentUserId,
-  canEdit,
   isArchived,
   onArchive,
   onUnarchive,
   onClose,
 }: TTaskDetailModalProps) {
   const dispatch = useAppDispatch();
+  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [editing, setEditing] = useState<TEditingField>(null);
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
@@ -36,7 +36,9 @@ export default function TaskDetailModal({
     task?.priority ?? "normal",
   );
   const [statusId, setStatusId] = useState(task?.statusId ?? "");
-  const [dueDate, setDueDate] = useState(dateValue(task?.dueDate ?? null));
+  const [dueDate, setDueDate] = useState(
+    toDateInputValue(task?.dueDate ?? null),
+  );
   const [assigneeId, setAssigneeId] = useState(task?.assigneeIds[0] ?? "");
   const [creatingSubtask, setCreatingSubtask] = useState(false);
   const [selectedSubtaskId, setSelectedSubtaskId] = useState<string | null>(
@@ -68,8 +70,6 @@ export default function TaskDetailModal({
     statuses,
     tasks,
     users,
-    currentUserId,
-    canEdit,
     isArchived,
     onArchive,
     onUnarchive,
@@ -110,8 +110,6 @@ export default function TaskDetailModal({
           statuses={statuses}
           tasks={tasks}
           users={users}
-          currentUserId={currentUserId}
-          canEdit={canEdit}
           isArchived={Boolean(selectedSubtask.archivedAt)}
           onArchive={onArchive}
           onUnarchive={onUnarchive}

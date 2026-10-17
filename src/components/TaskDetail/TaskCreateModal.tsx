@@ -7,6 +7,7 @@ import Select from "../DesignComponents/Select";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addTask } from "../../store/reducer/boardReducer";
 import type { TPriority, TStatus } from "../../store/types/common.types";
+import { TASK_PRIORITY_OPTIONS } from "../../constants/task.constants";
 
 type TTaskCreateModalProps = {
   listId: string;
@@ -14,11 +15,6 @@ type TTaskCreateModalProps = {
   parentTaskId?: string | null;
   onClose: () => void;
 };
-const priorities = ["urgent", "high", "normal", "low", "none"].map((value) => ({
-  value,
-  label: value,
-}));
-
 export default function TaskCreateModal({
   listId,
   status,
@@ -71,7 +67,7 @@ export default function TaskCreateModal({
       title={`${parentTaskId ? "Add subtask" : "Add task"} to ${status?.name ?? "board"}`}
       onClose={onClose}
     >
-      <form className="grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={submit}>
+      <form className="grid grid-cols-1 gap-3 sm:grid-cols-2" onSubmit={submit}>
         <div className="sm:col-span-2">
           <Input
             autoFocus
@@ -87,14 +83,14 @@ export default function TaskCreateModal({
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={3}
-            className="rounded-lg border border-brand-primary/15 bg-surface px-3 py-2 text-sm outline-none focus:border-brand-primary"
+            className="rounded-control border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-brand-primary"
             placeholder="Add context for this task"
           />
         </label>
         <Select
           label="Priority"
           value={priority}
-          options={priorities}
+          options={TASK_PRIORITY_OPTIONS}
           onChange={(value) => setPriority(value as TPriority)}
         />
         <DatePicker label="Due date" value={dueDate} onChange={setDueDate} />

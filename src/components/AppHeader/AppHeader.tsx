@@ -32,8 +32,8 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="flex h-16 w-full shrink-0 items-center justify-between border-b border-brand-primary/10 bg-surface px-6">
-      <div className="text-lg font-bold tracking-wide">FlowBoard</div>
+    <header className="flex h-14 w-full shrink-0 items-center justify-between border-b border-border bg-surface px-5">
+      <div className="text-base font-semibold tracking-tight">FlowBoard</div>
       <div ref={menuRef} className="relative">
         <Button
           type="button"
@@ -43,12 +43,12 @@ export default function AppHeader() {
           onClick={() => setOpen((isOpen) => !isOpen)}
           className="rounded-full p-0.5"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary/20 text-xs font-semibold text-brand-primary">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary/15 text-[11px] font-semibold text-brand-primary">
             {currentUser?.name.slice(0, 2).toUpperCase() ?? "??"}
           </span>
         </Button>
         {open && (
-          <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-brand-primary/10 bg-surface p-2 shadow-xl">
+          <div className="absolute right-0 top-full z-30 mt-2 w-60 rounded-panel border border-border bg-surface p-1.5 shadow-panel">
             <div className="border-b border-brand-primary/10 px-3 py-2">
               <p className="text-sm font-semibold">
                 {currentUser?.name ?? "User"}
