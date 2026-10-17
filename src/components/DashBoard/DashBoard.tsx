@@ -1,80 +1,40 @@
-import { useMemo, useState } from "react";
 import Paper from "../DesignComponents/Paper";
 import Button from "../DesignComponents/Button";
-import BoardViewTabs, { type TBoardView } from "../Board/BoardViewTabs";
-import BoardArchivedList from "../Board/BoardArchivedList";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import type { TRootState } from "../../store/reducer/rootReducer";
-import withSuspense from "../../utils/withSuspense";
-import type { TStatus } from "../../store/types/common.types";
-import useAccessControl from "../../hooks/useAccessControl";
+import BoardViewTabs from "../Board/BoardViewTabs";
 import TaskDetailModal from "../TaskDetail/TaskDetailModal";
 import TaskCreateModal from "../TaskDetail/TaskCreateModal";
-import type { TTask } from "../../store/types/common.types";
-import { archiveTask, unarchiveTask } from "../../store/reducer/boardReducer";
+import useDashboard from "../../hooks/useDashboard";
+import withSuspense from "../../utils/withSuspense";
 
-const selectBoardState = (state: TRootState): TRootState["board"] =>
-  state.board;
-const selectSelectedListId = (state: TRootState): string | null =>
-  state.session.selectedListId;
 const Board = withSuspense(() => import("../Board/Board"));
 const BoardList = withSuspense(() => import("../Board/BoardList"));
+const BoardArchivedList = withSuspense(
+  () => import("../Board/BoardArchivedList"),
+);
 
 export default function Dashboard() {
-  const [view, setView] = useState<TBoardView | "archived">("board");
-  const [newTaskStatusId, setNewTaskStatusId] = useState<string | null>(null);
-  const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
-  const { containers, statuses, tasks, users } =
-    useAppSelector(selectBoardState);
-  const dispatch = useAppDispatch();
-  const selectedListId = useAppSelector(selectSelectedListId);
-  const currentUserId = useAppSelector((state) => state.session.currentUserId);
-  const { canAccess } = useAccessControl();
-  const board = containers.find(
-    (item) =>
-      item.id === selectedListId && item.type === "list" && canAccess(item),
-  );
-  const selectedContainer = containers.find(
-    (item) => item.id === selectedListId,
-  );
-  const boardAccessDenied = Boolean(
-    selectedContainer && !canAccess(selectedContainer),
-  );
-  const folder = board
-    ? containers.find((item) => item.id === board.parentId)
-    : undefined;
-  const space = folder
-    ? containers.find((item) => item.id === folder.parentId)
-    : undefined;
-  const boardStatuses = [...statuses]
-    .filter((status) => status.listId === board?.id)
-    .sort((a, b) => a.position - b.position);
-  const boardTasks = tasks.filter(
-    (task) =>
-      task.primaryListId === board?.id &&
-      task.parentTaskId === null &&
-      task.archivedAt === null,
-  );
-  const boardAllTasks = tasks.filter(
-    (task) => task.primaryListId === board?.id,
-  );
-  const subtaskCounts = useMemo(() => {
-    const active: Record<string, number> = {};
-    const archived: Record<string, number> = {};
-    tasks.forEach((task) => {
-      if (!task.parentTaskId) return;
-      const target = task.archivedAt === null ? active : archived;
-      target[task.parentTaskId] = (target[task.parentTaskId] ?? 0) + 1;
-    });
-    return { active, archived };
-  }, [tasks]);
-  const archivedTasks = tasks.filter(
-    (task) => task.primaryListId === board?.id && task.archivedAt !== null,
-  );
-  const newTaskStatus: TStatus | null =
-    boardStatuses.find((status) => status.id === newTaskStatusId) ?? null;
-  const detailTask: TTask | null =
-    tasks.find((task) => task.id === detailTaskId) ?? null;
+  const {
+    view,
+    setView,
+    board,
+    boardAccessDenied,
+    folder,
+    space,
+    boardStatuses,
+    boardTasks,
+    boardAllTasks,
+    archivedTasks,
+    subtaskCounts,
+    users,
+    newTaskStatus,
+    detailTask,
+    openTask,
+    openTaskCreation,
+    closeTaskCreation,
+    closeTaskDetails,
+    archiveSelectedTask,
+    unarchiveSelectedTask,
+  } = useDashboard();
 
   return (
     <Paper className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -137,27 +97,25 @@ export default function Dashboard() {
               tasks={archivedTasks}
               users={users}
               subtaskCounts={subtaskCounts.archived}
-              onOpenTask={(task) => setDetailTaskId(task.id)}
+              onOpenTask={openTask}
             />
           ) : view === "board" ? (
             <Board
               name={board.name}
               statuses={boardStatuses}
               tasks={boardTasks}
-              currentUserId={currentUserId}
               users={users}
-              onOpenTask={(task) => setDetailTaskId(task.id)}
+              onOpenTask={openTask}
               subtaskCounts={subtaskCounts.active}
-              onAddTask={(status) => setNewTaskStatusId(status.id)}
+              onAddTask={openTaskCreation}
             />
           ) : (
             <BoardList
               statuses={boardStatuses}
               tasks={boardTasks}
               users={users}
-              currentUserId={currentUserId}
-              onAddTask={(status) => setNewTaskStatusId(status.id)}
-              onOpenTask={(task) => setDetailTaskId(task.id)}
+              onAddTask={openTaskCreation}
+              onOpenTask={openTask}
               subtaskCounts={subtaskCounts.active}
             />
           )
@@ -174,7 +132,7 @@ export default function Dashboard() {
           key={newTaskStatus.id}
           listId={board.id}
           status={newTaskStatus}
-          onClose={() => setNewTaskStatusId(null)}
+          onClose={closeTaskCreation}
         />
       )}
       <TaskDetailModal
@@ -188,18 +146,10 @@ export default function Dashboard() {
         statuses={boardStatuses}
         tasks={boardAllTasks}
         users={users}
-        currentUserId={currentUserId}
-        canEdit={Boolean(board)}
         isArchived={Boolean(detailTask?.archivedAt)}
-        onArchive={(task) => {
-          dispatch(archiveTask({ taskId: task.id, currentUserId }));
-          setDetailTaskId(null);
-        }}
-        onUnarchive={(task) => {
-          dispatch(unarchiveTask({ taskId: task.id, currentUserId }));
-          setDetailTaskId(null);
-        }}
-        onClose={() => setDetailTaskId(null)}
+        onArchive={archiveSelectedTask}
+        onUnarchive={unarchiveSelectedTask}
+        onClose={closeTaskDetails}
       />
     </Paper>
   );

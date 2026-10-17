@@ -1,14 +1,16 @@
 import Button from "../DesignComponents/Button";
 import type { TTaskDetailSubtasksProps } from "../../types/taskDetail.types";
+import useAccessControl from "../../hooks/useAccessControl";
 
 export default function TaskDetailSubtasks({
   task,
   tasks,
-  canEdit,
   isArchived,
   onCreateSubtask,
   onOpenSubtask,
 }: TTaskDetailSubtasksProps) {
+  const { canEditTask } = useAccessControl();
+  const canEdit = canEditTask(task);
   const subtasks = tasks
     .filter(
       (item) =>

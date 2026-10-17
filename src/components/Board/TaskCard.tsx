@@ -1,6 +1,7 @@
 import type { DragEvent } from "react";
 import type { TTask, TUser } from "../../store/types/common.types";
 import TaskAssignees from "../TaskDetail/TaskAssignees";
+import { TASK_PRIORITY_TEXT_CLASSES } from "../../constants/board.constants";
 
 type TTaskCardProps = {
   task: TTask;
@@ -29,13 +30,7 @@ export default function TaskCard({
   onOpen,
   subtaskCount,
 }: TTaskCardProps) {
-  const priorityClass = {
-    urgent: "text-red-500",
-    high: "text-orange-500",
-    normal: "text-brand-primary",
-    low: "text-text/50",
-    none: "text-text/40",
-  }[task.priority];
+  const priorityClass = TASK_PRIORITY_TEXT_CLASSES[task.priority];
 
   return (
     <article

@@ -1,5 +1,6 @@
 import Button from "../DesignComponents/Button";
 import type { TTaskDetailFieldProps } from "../../types/taskDetail.types";
+import useAccessControl from "../../hooks/useAccessControl";
 
 export default function TaskDetailDescription({
   task,
@@ -8,15 +9,15 @@ export default function TaskDetailDescription({
   onDescriptionChange,
   onEdit,
   onSave,
-  canEdit,
 }: TTaskDetailFieldProps) {
+  const { canEditTask } = useAccessControl();
   return (
     <div className="rounded-panel border border-border p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wide text-text/45">
           Description
         </span>
-        {canEdit && (
+        {canEditTask(task) && (
           <Button
             type="button"
             variant="subtle"

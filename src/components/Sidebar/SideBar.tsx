@@ -4,11 +4,12 @@ import Button from "../DesignComponents/Button";
 import useSideBar from "../../hooks/useSideBar";
 import withSuspense from "../../utils/withSuspense";
 import AddForm from "./AddForm";
-const FolderTree = withSuspense(() => import("./FolderTree"));
+import { WORKSPACE_ICON } from "../../constants/sidebar.constants";
 import ContainerDetailsModal from "./ContainerDetailsModal";
 import ContainerActions from "./ContainerActions";
+import useAccessControl from "../../hooks/useAccessControl";
 
-const workspaceIcon = "◆";
+const FolderTree = withSuspense(() => import("./FolderTree"));
 
 export default function Sidebar() {
   const {
@@ -26,12 +27,9 @@ export default function Sidebar() {
     edit,
     remove,
     selectBoard,
-    users,
-    canManage,
-    canCreateSpace,
-    canCreateInSpace,
-    getAccessUserIds,
   } = useSideBar();
+
+  const { canManageContainers, canCreateSpace } = useAccessControl();
   const beginSpace = () => startAdding({ type: "space" });
 
   return (
@@ -41,38 +39,44 @@ export default function Sidebar() {
           <p className="text-caption font-semibold uppercase tracking-wider text-muted">
             Workspace
           </p>
-          {canCreateSpace && <Button
-            type="button"
-            variant="subtle"
-            aria-label="Create space"
-            title="Create space"
-            onClick={beginSpace}
-            className="px-1.5 py-0.5 text-base leading-none"
-          >
-            +
-          </Button>}
+          {canCreateSpace && (
+            <Button
+              type="button"
+              variant="subtle"
+              aria-label="Create space"
+              title="Create space"
+              onClick={beginSpace}
+              className="px-1.5 py-0.5 text-base leading-none"
+            >
+              +
+            </Button>
+          )}
         </div>
         <Accordion>
           <AccordionItem
             title="FlowBoard workspace"
             defaultOpen
-            icon={<span className="text-xs">{workspaceIcon}</span>}
+            icon={<span className="text-xs">{WORKSPACE_ICON}</span>}
             actions={
               <div className="flex items-center">
-                {canManage && <ContainerActions
-                  name="workspace"
-                  onEdit={() => startEditing("workspace-flowboard")}
-                />}
-                {canCreateSpace && <Button
-                  type="button"
-                  variant="subtle"
-                  aria-label="Create space"
-                  title="Create space"
-                  onClick={beginSpace}
-                  className="px-1.5 py-0.5 text-base leading-none"
-                >
-                  +
-                </Button>}
+                {canManageContainers && (
+                  <ContainerActions
+                    name="workspace"
+                    onEdit={() => startEditing("workspace-flowboard")}
+                  />
+                )}
+                {canCreateSpace && (
+                  <Button
+                    type="button"
+                    variant="subtle"
+                    aria-label="Create space"
+                    title="Create space"
+                    onClick={beginSpace}
+                    className="px-1.5 py-0.5 text-base leading-none"
+                  >
+                    +
+                  </Button>
+                )}
               </div>
             }
           >
@@ -92,29 +96,25 @@ export default function Sidebar() {
                 cancelEditing={cancelEditing}
                 edit={edit}
                 remove={remove}
-                canManage={canManage}
-                userOptions={users.map((user) => ({ value: user.id, label: user.name }))}
-                getAccessUserIds={getAccessUserIds}
-                canCreateItems={canCreateInSpace(space)}
               />
             ))}
             {!spaces.length && (
               <p className="py-2 pl-7 text-xs text-text/40">No spaces yet</p>
             )}
           </AccordionItem>
-          </Accordion>
-          {editingId === "workspace-flowboard" && (
-            <ContainerDetailsModal
-              key={editingId}
-              title="Edit workspace"
-              name="FlowBoard workspace"
-              onSubmit={(name) => edit("workspace-flowboard", name)}
-              onClose={cancelEditing}
-            />
-          )}
-          {adding?.type === "space" && (
-            <AddForm target={adding} create={create} cancel={cancelAdding} userOptions={users.map((user) => ({ value: user.id, label: user.name }))} canManageAccess={canManage} />
-          )}
+        </Accordion>
+        {editingId === "workspace-flowboard" && (
+          <ContainerDetailsModal
+            key={editingId}
+            title="Edit workspace"
+            name="FlowBoard workspace"
+            onSubmit={(name) => edit("workspace-flowboard", name)}
+            onClose={cancelEditing}
+          />
+        )}
+        {adding?.type === "space" && (
+          <AddForm target={adding} create={create} cancel={cancelAdding} />
+        )}
       </nav>
       <div className="border-t border-border px-3 py-2.5 text-xs text-muted">
         {selectedBoard

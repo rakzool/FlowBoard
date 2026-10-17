@@ -1,14 +1,7 @@
 import type { TUser } from "../../store/types/common.types";
+import { getUserInitials } from "../../utils/taskFormatting";
 
 type TTaskAssigneesProps = { assigneeIds: string[]; users: TUser[] };
-
-const initials = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
 export default function TaskAssignees({
   assigneeIds,
@@ -31,7 +24,7 @@ export default function TaskAssignees({
             title={user.name}
             className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-brand-primary/15 text-[10px] font-semibold text-brand-primary"
           >
-            {initials(user.name)}
+            {getUserInitials(user.name)}
           </span>
         ))}
       </div>

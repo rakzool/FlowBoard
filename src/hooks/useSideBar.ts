@@ -11,7 +11,6 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import type {
   TContainer,
   TContainerAccessDetails,
-  TGrantMode,
 } from "../store/types/common.types";
 import useAccessControl from "./useAccessControl";
 
@@ -27,10 +26,8 @@ export default function useSideBar() {
   const dispatch = useAppDispatch();
   const {
     containers,
-    grants,
-    users,
     currentUserId,
-    canManage,
+    canManageContainers,
     canCreateSpace,
     canAccess,
   } = useAccessControl();
@@ -107,7 +104,7 @@ export default function useSideBar() {
     name: string,
     accessDetails?: TContainerAccessDetails,
   ) => {
-    if (!canManage) {
+    if (!canManageContainers) {
       dispatch(
         reportBoardError({
           code: "FORBIDDEN",
@@ -143,7 +140,7 @@ export default function useSideBar() {
         }
       });
     }
-    if (canManage) {
+    if (canManageContainers) {
       dispatch(removeContainer({ id, currentUserId }));
     } else {
       dispatch(
@@ -166,16 +163,6 @@ export default function useSideBar() {
     boards: containers.filter(
       (item) => item.type === "list" && canAccess(item),
     ),
-    users,
-    getAccessUserIds: (resourceId: string, mode: TGrantMode) =>
-      grants
-        .filter(
-          (grant) => grant.resourceId === resourceId && grant.mode === mode,
-        )
-        .map((grant) => grant.userId),
-    canManage,
-    canCreateSpace,
-    canCreateInSpace: (space: TSpace) => canAccess(space),
     adding,
     editingId,
     selectedBoard,

@@ -1,18 +1,15 @@
 import { useState } from "react";
 import Paper from "../DesignComponents/Paper";
 import type { TStatus, TTask, TUser } from "../../store/types/common.types";
-import withSuspense from "../../utils/withSuspense";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { moveTask } from "../../store/reducer/boardReducer";
-
-const BoardColumn = withSuspense(() => import("./BoardColumn"));
+import BoardColumn from "./BoardColumn";
 
 type TBoardProps = {
   name: string;
   statuses: TStatus[];
   tasks: TTask[];
   onAddTask: (status: TStatus) => void;
-  currentUserId: string;
   users: TUser[];
   onOpenTask: (task: TTask) => void;
   subtaskCounts: Record<string, number>;
@@ -23,12 +20,12 @@ export default function Board({
   statuses,
   tasks,
   onAddTask,
-  currentUserId,
   users,
   onOpenTask,
   subtaskCounts,
 }: TBoardProps) {
   const dispatch = useAppDispatch();
+  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const onMoveTask = (taskId: string, statusId: string, position: number) => {
     dispatch(moveTask({ taskId, statusId, position, currentUserId }));

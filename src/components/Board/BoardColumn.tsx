@@ -1,16 +1,9 @@
 import type { DragEvent } from "react";
 import type { TStatus, TTask, TUser } from "../../store/types/common.types";
 import Button from "../DesignComponents/Button";
-import withSuspense from "../../utils/withSuspense";
-
-const TaskCard = withSuspense(() => import("./TaskCard"));
-const formatDueDate = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat(undefined, {
-        month: "short",
-        day: "numeric",
-      }).format(new Date(value))
-    : "No due date";
+import TaskCard from "./TaskCard";
+import { STATUS_CATEGORY_CLASSES } from "../../constants/board.constants";
+import { formatShortDueDate } from "../../utils/taskFormatting";
 
 type TBoardColumnProps = {
   status: TStatus;
@@ -37,12 +30,7 @@ export default function BoardColumn({
   onOpenTask,
   subtaskCounts,
 }: TBoardColumnProps) {
-  const dotClass =
-    status.category === "done"
-      ? "bg-emerald-500"
-      : status.category === "active"
-        ? "bg-brand-primary"
-        : "bg-brand-secondary";
+  const dotClass = STATUS_CATEGORY_CLASSES[status.category];
   const handleDrop = (event: DragEvent<HTMLElement>, position: number) => {
     event.preventDefault();
     event.stopPropagation();
@@ -91,7 +79,7 @@ export default function BoardColumn({
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => handleDrop(event, index)}
               users={users}
-              dueDateLabel={formatDueDate(task.dueDate)}
+              dueDateLabel={formatShortDueDate(task.dueDate)}
               onOpen={() => onOpenTask(task)}
               subtaskCount={subtaskCounts[task.id] ?? 0}
             />

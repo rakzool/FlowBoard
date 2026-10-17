@@ -4,16 +4,9 @@ import Select from "../DesignComponents/Select";
 import TaskAssignees from "./TaskAssignees";
 import type { TPriority } from "../../store/types/common.types";
 import type { TTaskDetailMetadataProps } from "../../types/taskDetail.types";
-
-const priorities: { value: TPriority; label: string }[] = (
-  ["urgent", "high", "normal", "low", "none"] as TPriority[]
-).map((value) => ({ value, label: value }));
-const formatDueDate = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(
-        new Date(value),
-      )
-    : "No due date";
+import useAccessControl from "../../hooks/useAccessControl";
+import { TASK_PRIORITY_OPTIONS } from "../../constants/task.constants";
+import { formatLongDueDate } from "../../utils/taskFormatting";
 
 export default function TaskDetailMetadata({
   task,
@@ -31,11 +24,12 @@ export default function TaskDetailMetadata({
   onAssigneeChange,
   onEdit,
   onSave,
-  canEdit,
   isArchived,
   onArchive,
   onUnarchive,
 }: TTaskDetailMetadataProps) {
+  const { canEditTask } = useAccessControl();
+  const canEdit = canEditTask(task);
   const editButton = (field: Exclude<NonNullable<typeof editing>, null>) =>
     canEdit && (
       <Button
@@ -86,7 +80,7 @@ export default function TaskDetailMetadata({
             <Select
               label=""
               value={priority}
-              options={priorities}
+              options={TASK_PRIORITY_OPTIONS}
               onChange={(value) => onPriorityChange(value as TPriority)}
             />
           ) : (
@@ -112,7 +106,7 @@ export default function TaskDetailMetadata({
           {editing === "dueDate" ? (
             <DatePicker label="" value={dueDate} onChange={onDueDateChange} />
           ) : (
-            <dd className="mt-1 font-medium">{formatDueDate(task.dueDate)}</dd>
+            <dd className="mt-1 font-medium">{formatLongDueDate(task.dueDate)}</dd>
           )}
         </div>
         {editing === "dueDate" ? (

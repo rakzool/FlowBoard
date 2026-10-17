@@ -7,6 +7,7 @@ import Select from "../DesignComponents/Select";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addTask } from "../../store/reducer/boardReducer";
 import type { TPriority, TStatus } from "../../store/types/common.types";
+import { TASK_PRIORITY_OPTIONS } from "../../constants/task.constants";
 
 type TTaskCreateModalProps = {
   listId: string;
@@ -14,11 +15,6 @@ type TTaskCreateModalProps = {
   parentTaskId?: string | null;
   onClose: () => void;
 };
-const priorities = ["urgent", "high", "normal", "low", "none"].map((value) => ({
-  value,
-  label: value,
-}));
-
 export default function TaskCreateModal({
   listId,
   status,
@@ -94,7 +90,7 @@ export default function TaskCreateModal({
         <Select
           label="Priority"
           value={priority}
-          options={priorities}
+          options={TASK_PRIORITY_OPTIONS}
           onChange={(value) => setPriority(value as TPriority)}
         />
         <DatePicker label="Due date" value={dueDate} onChange={setDueDate} />
