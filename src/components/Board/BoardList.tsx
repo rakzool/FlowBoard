@@ -86,7 +86,7 @@ export default function BoardList({
   };
 
   return (
-    <Paper className="min-w-[28rem] rounded-xl border border-brand-primary/10 p-2">
+    <Paper className="min-w-[28rem] rounded-panel border border-border px-2 pt-2 pb-0">
       <div className="flex items-center justify-between border-b border-brand-primary/10 px-3 py-2">
         <p className="text-xs text-text/50">{tasks.length} tasks</p>
         <div className="flex items-center gap-1 text-xs text-text/55">

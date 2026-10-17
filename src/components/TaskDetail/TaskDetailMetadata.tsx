@@ -48,7 +48,7 @@ export default function TaskDetailMetadata({
       </Button>
     );
   return (
-    <dl className="space-y-3 rounded-xl bg-brand-primary/5 p-4">
+    <dl className="space-y-2.5 rounded-panel bg-surface-subtle p-3">
       <div className="flex items-center justify-between gap-3">
         <div>
           <dt className="text-xs text-text/45">Status</dt>

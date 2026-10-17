@@ -72,6 +72,12 @@ export type TPatch<T>  = {
 
 // ---- Consistent store result / error shape --------------------------------
 export type TErrorCode = 'FORBIDDEN' | 'NOT_FOUND' | 'VALIDATION' | 'CONFLICT';
+export type TFeedbackKind = 'success' | 'error';
+export type TBoardFeedback = {
+  id: number;
+  kind: TFeedbackKind;
+  message: string;
+};
 
 // eslint-disable-next-line
 export interface TStoreError {

@@ -11,7 +11,7 @@ export default function TaskDetailDescription({
   canEdit,
 }: TTaskDetailFieldProps) {
   return (
-    <div className="rounded-xl border border-brand-primary/10 p-4">
+    <div className="rounded-panel border border-border p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wide text-text/45">
           Description
@@ -34,7 +34,7 @@ export default function TaskDetailDescription({
             value={description}
             onChange={(event) => onDescriptionChange(event.target.value)}
             rows={6}
-            className="w-full rounded-lg border border-brand-primary/15 bg-surface px-3 py-2 text-sm outline-none focus:border-brand-primary"
+            className="w-full rounded-control border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-brand-primary"
           />
           <Button
             type="button"

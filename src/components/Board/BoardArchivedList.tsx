@@ -27,9 +27,9 @@ export default function BoardArchivedList({
     (a, b) => Date.parse(b.archivedAt ?? "") - Date.parse(a.archivedAt ?? ""),
   );
   return (
-    <Paper className="min-w-[28rem] rounded-xl border border-brand-primary/10 p-4">
-      <div className="mb-4 border-b border-brand-primary/10 pb-3">
-        <h2 className="text-lg font-semibold">Archived tickets</h2>
+    <Paper className="min-w-[28rem] rounded-panel border border-border p-3">
+      <div className="mb-3 border-b border-border pb-3">
+        <h2 className="text-base font-semibold">Archived tickets</h2>
         <p className="mt-1 text-xs text-text/50">
           Tickets archived from this board.
         </p>

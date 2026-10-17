@@ -4,6 +4,7 @@ import {
   removeContainer,
   updateContainerAccess,
   updateContainer,
+  reportBoardError,
 } from "../store/reducer/boardReducer";
 import { selectList } from "../store/reducer/sessionReducer";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -36,7 +37,6 @@ export default function useSideBar() {
   const selectedListId = useAppSelector(
     (state) => state.session.selectedListId,
   );
-  const lastError = useAppSelector((state) => state.board.lastError);
   const [adding, setAdding] = useState<TAddTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const spaces = containers.filter(
@@ -47,12 +47,29 @@ export default function useSideBar() {
     null;
 
   const create = (name: string, accessDetails?: TContainerAccessDetails) => {
-    if (!adding || !canCreateSpace) return;
+    if (!adding) return;
+    if (!canCreateSpace) {
+      dispatch(
+        reportBoardError({
+          code: "FORBIDDEN",
+          message: "403: You do not have permission to create spaces.",
+        }),
+      );
+      return;
+    }
     const parentId = adding.parentId ?? "workspace-flowboard";
     const type = adding.type === "board" ? "list" : adding.type;
     if (type !== "space") {
       const parent = containers.find((item) => item.id === parentId);
-      if (!parent || !canAccess(parent)) return;
+      if (!parent) {
+        dispatch(
+          reportBoardError({
+            code: "VALIDATION",
+            message: "The selected parent container no longer exists.",
+          }),
+        );
+        return;
+      }
     }
     const position = containers.filter(
       (item) => item.parentId === parentId && item.type === type,
@@ -90,7 +107,14 @@ export default function useSideBar() {
     name: string,
     accessDetails?: TContainerAccessDetails,
   ) => {
-    if (canManage && name.trim()) {
+    if (!canManage) {
+      dispatch(
+        reportBoardError({
+          code: "FORBIDDEN",
+          message: "403: Only administrators can edit containers.",
+        }),
+      );
+    } else if (name.trim()) {
       dispatch(updateContainer({ id, name: name.trim(), currentUserId }));
       if (accessDetails)
         dispatch(
@@ -119,7 +143,16 @@ export default function useSideBar() {
         }
       });
     }
-    if (canManage) dispatch(removeContainer({ id, currentUserId }));
+    if (canManage) {
+      dispatch(removeContainer({ id, currentUserId }));
+    } else {
+      dispatch(
+        reportBoardError({
+          code: "FORBIDDEN",
+          message: "403: Only administrators can delete containers.",
+        }),
+      );
+    }
     if (selectedListId && removed.has(selectedListId))
       dispatch(selectList(null));
     setEditingId(null);
@@ -143,7 +176,6 @@ export default function useSideBar() {
     canManage,
     canCreateSpace,
     canCreateInSpace: (space: TSpace) => canAccess(space),
-    lastError,
     adding,
     editingId,
     selectedBoard,

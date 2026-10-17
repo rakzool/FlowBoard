@@ -34,10 +34,10 @@ export default function Input({
           disabled={disabled}
           autoFocus={autoFocus}
           maxLength={maxLength}
-          className={`peer w-full rounded-lg border bg-white dark:bg-slate-900 px-4 pt-5 pb-2 text-sm text-slate-800 dark:text-slate-100 outline-none transition-all duration-200 placeholder-transparent disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 dark:disabled:bg-slate-800 ${
+          className={`peer w-full rounded-control border border-border bg-surface px-3 pt-4 pb-1.5 text-sm text-text outline-none transition-all duration-200 placeholder-transparent disabled:cursor-not-allowed disabled:bg-surface-subtle disabled:opacity-60 ${
             error
-              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-              : "border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              ? "border-danger focus:border-danger focus:ring-2 focus:ring-danger/20"
+              : "focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
           }`}
         />
         <label
@@ -47,8 +47,8 @@ export default function Input({
             error
               ? "text-red-500"
               : isFocused
-                ? "text-indigo-600 dark:text-indigo-400"
-                : "text-slate-400"
+                ? "text-brand-primary"
+                : "text-muted"
           }`}
         >
           {placeholder}

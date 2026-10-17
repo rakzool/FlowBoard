@@ -30,7 +30,6 @@ export default function Dashboard() {
   const selectedListId = useAppSelector(selectSelectedListId);
   const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const { canAccess } = useAccessControl();
-  const boardError = useAppSelector((state) => state.board.lastError);
   const board = containers.find(
     (item) =>
       item.id === selectedListId && item.type === "list" && canAccess(item),
@@ -79,30 +78,22 @@ export default function Dashboard() {
 
   return (
     <Paper className="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <div className="border-b border-brand-primary/10 px-6 py-5">
-        {boardError && (
-          <p
-            role="alert"
-            className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-600"
-          >
-            {boardError.message}
-          </p>
-        )}
+      <div className="border-b border-border px-5 py-4">
         <p className="text-xs text-text/45">
           {space?.name ?? "Workspace"}
           {folder ? ` / ${folder.name}` : ""}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-xl font-semibold tracking-tight">
           {board?.name ?? "Choose a board"}
         </h1>
-        <p className="mt-1 text-sm text-text/55">
-          {board
-            ? "Keep work moving across the team."
-            : "Select a board from the sidebar to see its work."}
-        </p>
+        {!board && (
+          <p className="mt-1 text-sm text-muted">
+            Select a board from the sidebar to see its work.
+          </p>
+        )}
       </div>
       {view === "archived" ? (
-        <div className="flex items-center gap-2 border-b border-brand-primary/10 px-6">
+        <div className="flex items-center gap-2 border-b border-border px-5">
           <Button
             type="button"
             variant="ghost"
@@ -116,7 +107,7 @@ export default function Dashboard() {
           </span>
         </div>
       ) : (
-        <div className="flex items-center justify-between border-b border-brand-primary/10 pr-6">
+        <div className="flex items-center justify-between border-b border-border pr-5">
           <BoardViewTabs view={view} onChange={setView} />
           {board && (
             <Button
@@ -130,7 +121,7 @@ export default function Dashboard() {
           )}
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto p-6">
+      <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto p-5">
         {boardAccessDenied ? (
           <div className="flex h-full items-center justify-center">
             <p

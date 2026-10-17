@@ -24,13 +24,13 @@ export default function AccordionItem({
   const paddingClass = ["pl-1", "pl-4", "pl-7"][Math.min(level, 2)];
   return (
     <div className="min-w-0">
-      <div className="group flex min-h-9 items-center gap-1 rounded-lg hover:bg-brand-primary/10">
+      <div className="group flex min-h-8 items-center gap-1 rounded-control hover:bg-brand-primary/10">
         <Button
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((isOpen) => !isOpen)}
           variant="ghost"
-          className={`flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-1 text-left text-sm ${paddingClass}`}
+          className={`flex min-w-0 flex-1 items-center gap-1.5 py-1 pr-1 text-left text-sm ${paddingClass}`}
         >
           <span
             aria-hidden="true"
