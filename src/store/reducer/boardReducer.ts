@@ -539,7 +539,6 @@ const boardSlice = createSlice({
         item.position = index;
       });
       task.updatedAt = new Date().toISOString();
-      setSuccess(state, "Task moved successfully.");
     },
     reportBoardError: (
       state,
