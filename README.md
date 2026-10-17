@@ -55,6 +55,22 @@ The main boundaries are:
 - Redux owns domain state and mutation validation. React hooks own transient UI state such as open dialogs, selected views, and drag state.
 - `useAccessControl` is the shared React boundary for access decisions. Pure access logic lives in `src/store/access.ts`; visible-tree selectors live in `src/store/selectors/accessSelectors.ts`.
 
+### Redux reducer structure
+
+The `board` state remains one cohesive Redux slice so existing selectors and component dispatches keep the same state paths and action names. Its implementation is separated by domain responsibility:
+
+```text
+src/store/reducer/boardReducer.ts
+└── board slice assembler
+    ├── board/containerReducers.ts  # hierarchy, grants, and container deletion
+    ├── board/taskReducers.ts       # task validation, edits, archive, and ordering
+    ├── board/feedbackReducers.ts   # errors and mutation feedback
+    ├── board/boardTypes.ts         # board state and action payload types
+    └── board/boardUtils.ts         # access, validation, status, and feedback helpers
+```
+
+This is module-level separation rather than class-based state management: Redux Toolkit reducers are action handlers over immutable state drafts, so keeping one slice preserves cross-entity operations such as deleting a board and its statuses/tasks/grants while making each entity’s behavior independently readable and testable.
+
 ## Data model
 
 The directory model is hierarchical:
@@ -118,7 +134,7 @@ In week 2, the client-focused next steps would be:
 - Codex was used to inspect the repository, read the project architecture/context files, and draft this README.
 - The FlowBoard repository skill was used to follow the repository’s documentation and verification conventions.
 - AI assistance helped organize the architecture diagram and explain the existing store, selectors, archive behavior, and trade-offs.
-- The generated content was checked against the source tree, reducer/selectors, tests, package scripts, and architecture notes. Corrections included replacing the default Vite README, documenting the actual in-memory/seed-data limitation, describing reducer-level permission enforcement, and recording the existing one-level subtask archive behavior rather than assuming a backend or permanent delete model.
+- The generated content was checked against the source tree, reducer/selectors, tests, package scripts, and architecture notes. Corrections included replacing the default Vite README, documenting the actual in-memory/seed-data limitation, describing reducer-level permission enforcement, recording the existing one-level subtask archive behavior rather than assuming a backend or permanent delete model, and documenting the reducer module split.
 - No external AI tools or external data sources were used for the README.
 
 ## Drag-and-drop note
