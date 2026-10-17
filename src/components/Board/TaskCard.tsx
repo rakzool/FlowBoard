@@ -1,6 +1,6 @@
 import type { DragEvent } from "react";
 import type { TTask, TUser } from "../../store/types/common.types";
-import TaskAssignees from "./TaskAssignees";
+import TaskAssignees from "../TaskDetail/TaskAssignees";
 
 type TTaskCardProps = {
   task: TTask;
@@ -13,6 +13,7 @@ type TTaskCardProps = {
   users: TUser[];
   dueDateLabel: string;
   onOpen: () => void;
+  subtaskCount: number;
 };
 
 export default function TaskCard({
@@ -26,6 +27,7 @@ export default function TaskCard({
   users,
   dueDateLabel,
   onOpen,
+  subtaskCount,
 }: TTaskCardProps) {
   const priorityClass = {
     urgent: "text-red-500",
@@ -37,6 +39,15 @@ export default function TaskCard({
 
   return (
     <article
+      tabIndex={0}
+      role="button"
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
       draggable={draggable}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -52,18 +63,17 @@ export default function TaskCard({
           {task.priority}
         </span>
       </div>
+      {subtaskCount > 0 && (
+        <span className="inline-flex items-center rounded-full bg-brand-primary/10 px-2 py-1 text-[10px] font-semibold text-brand-primary">
+          {subtaskCount} {subtaskCount === 1 ? "subtask" : "subtasks"}
+        </span>
+      )}
       {task.description && (
         <p className="text-xs leading-5 text-text/55">{task.description}</p>
       )}
       <div className="mt-4 flex items-center justify-between gap-2 text-[11px]">
         <TaskAssignees assigneeIds={task.assigneeIds} users={users} />
-        <button
-          type="button"
-          onClick={onOpen}
-          className="shrink-0 text-text/45 hover:text-brand-primary"
-        >
-          {dueDateLabel}
-        </button>
+        <span className="shrink-0 text-text/45">{dueDateLabel}</span>
       </div>
     </article>
   );

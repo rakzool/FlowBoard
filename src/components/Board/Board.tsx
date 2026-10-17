@@ -15,6 +15,7 @@ type TBoardProps = {
   currentUserId: string;
   users: TUser[];
   onOpenTask: (task: TTask) => void;
+  subtaskCounts: Record<string, number>;
 };
 
 export default function Board({
@@ -25,6 +26,7 @@ export default function Board({
   currentUserId,
   users,
   onOpenTask,
+  subtaskCounts,
 }: TBoardProps) {
   const dispatch = useAppDispatch();
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export default function Board({
                 onDragEnd={() => setDraggingTaskId(null)}
                 users={users}
                 onOpenTask={onOpenTask}
+                subtaskCounts={subtaskCounts}
                 tasks={tasks
                   .filter((task) => task.statusId === status.id)
                   .sort((a, b) => a.position - b.position)}

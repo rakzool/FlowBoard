@@ -11,9 +11,9 @@ import type { TPriority, TStatus } from "../../store/types/common.types";
 type TTaskCreateModalProps = {
   listId: string;
   status: TStatus | null;
+  parentTaskId?: string | null;
   onClose: () => void;
 };
-
 const priorities = ["urgent", "high", "normal", "low", "none"].map((value) => ({
   value,
   label: value,
@@ -22,29 +22,32 @@ const priorities = ["urgent", "high", "normal", "low", "none"].map((value) => ({
 export default function TaskCreateModal({
   listId,
   status,
+  parentTaskId = null,
   onClose,
 }: TTaskCreateModalProps) {
   const dispatch = useAppDispatch();
   const tasks = useAppSelector((state) => state.board.tasks);
+  const users = useAppSelector((state) => state.board.users);
+  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TPriority>("normal");
   const [assigneeId, setAssigneeId] = useState("");
-  const users = useAppSelector((state) => state.board.users);
-  const currentUserId = useAppSelector((state) => state.session.currentUserId);
   const [dueDate, setDueDate] = useState("");
-
   const submit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
     if (!status || !title.trim()) return;
-    const statusTasks = tasks.filter((task) => task.statusId === status.id);
+    const statusTasks = tasks.filter(
+      (task) =>
+        task.statusId === status.id && task.parentTaskId === parentTaskId,
+    );
     dispatch(
       addTask({
         currentUserId,
         task: {
           id: `task-${Date.now()}`,
           primaryListId: listId,
-          parentTaskId: null,
+          parentTaskId,
           title: title.trim(),
           description: description.trim() || undefined,
           statusId: status.id,
@@ -56,16 +59,16 @@ export default function TaskCreateModal({
           position: statusTasks.length,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
+          archivedAt: null,
         },
       }),
     );
     onClose();
   };
-
   return (
     <Modal
       open={Boolean(status)}
-      title={`Add task to ${status?.name ?? "board"}`}
+      title={`${parentTaskId ? "Add subtask" : "Add task"} to ${status?.name ?? "board"}`}
       onClose={onClose}
     >
       <form className="grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={submit}>
@@ -121,7 +124,7 @@ export default function TaskCreateModal({
             disabled={!title.trim()}
             className="px-4 py-2 text-sm"
           >
-            Create task
+            {parentTaskId ? "Create subtask" : "Create task"}
           </Button>
         </div>
       </form>

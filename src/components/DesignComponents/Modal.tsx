@@ -6,9 +6,16 @@ type TModalProps = {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  size?: "lg" | "xl";
 };
 
-export default function Modal({ open, title, children, onClose }: TModalProps) {
+export default function Modal({
+  open,
+  title,
+  children,
+  onClose,
+  size = "lg",
+}: TModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -29,7 +36,7 @@ export default function Modal({ open, title, children, onClose }: TModalProps) {
     >
       <div className="absolute inset-0" onMouseDown={onClose} />
       <section
-        className="relative z-10 w-full max-w-lg rounded-2xl border border-brand-primary/10 bg-surface p-6 shadow-xl"
+        className={`relative z-10 w-full ${size === "xl" ? "max-w-4xl" : "max-w-lg"} rounded-2xl border border-brand-primary/10 bg-surface p-6 shadow-xl`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

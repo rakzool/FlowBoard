@@ -8,6 +8,7 @@ import type {
   TStatus,
   TTask,
   TTaskCreate,
+  TTaskUpdate,
   TGrant,
   TUser,
   TErrorCode,
@@ -37,6 +38,13 @@ const setError = (state: TBoardState, message: string) => {
 };
 const clearError = (state: TBoardState) => {
   state.lastError = null;
+};
+const taskTree = (state: TBoardState, rootId: string) => {
+  const ids = new Set([rootId]);
+  state.tasks.forEach((task) => {
+    if (task.parentTaskId && ids.has(task.parentTaskId)) ids.add(task.id);
+  });
+  return state.tasks.filter((task) => ids.has(task.id));
 };
 const getUser = (state: TBoardState, userId: string | undefined) =>
   state.users.find((user) => user.id === userId);
@@ -86,10 +94,19 @@ const hasValidTaskShape = (state: TBoardState, task: TTask) => {
     (item) => item.id === task.primaryListId && item.type === "list",
   );
   const status = state.statuses.find((item) => item.id === task.statusId);
+  const parentTask = task.parentTaskId
+    ? state.tasks.find((item) => item.id === task.parentTaskId)
+    : undefined;
   return Boolean(
     list &&
     status &&
     status.listId === list.id &&
+    (!task.parentTaskId ||
+      Boolean(
+        parentTask &&
+        parentTask.parentTaskId === null &&
+        parentTask.primaryListId === task.primaryListId,
+      )) &&
     task.title.trim() &&
     task.title.length <= 500 &&
     priorities.includes(task.priority) &&
@@ -289,6 +306,13 @@ const boardSlice = createSlice({
     },
     addTask: (state, action: PayloadAction<TTaskCreate>) => {
       const { task, currentUserId } = action.payload;
+      if (task.parentTaskId === task.id) {
+        state.lastError = {
+          code: "VALIDATION",
+          message: "A task cannot be its own parent.",
+        };
+        return;
+      }
       if (!canMutate(state, currentUserId, task.primaryListId)) {
         setError(
           state,
@@ -301,6 +325,131 @@ const boardSlice = createSlice({
         state.tasks.push({
           ...task,
           title: task.title.trim(),
+        });
+    },
+    updateTask: (state, action: PayloadAction<TTaskUpdate>) => {
+      const task = state.tasks.find((item) => item.id === action.payload.id);
+      if (!task) return;
+      if (!canMutate(state, action.payload.currentUserId, task.primaryListId)) {
+        setError(state, "403: You do not have permission to edit this task.");
+        return;
+      }
+      const changes = action.payload.changes;
+      const nextStatus = changes.statusId
+        ? state.statuses.find((item) => item.id === changes.statusId)
+        : undefined;
+      const nextTask = { ...task, ...changes };
+      if (
+        (nextStatus && nextStatus.listId !== task.primaryListId) ||
+        !hasValidTaskShape(state, nextTask)
+      ) {
+        state.lastError = {
+          code: "VALIDATION",
+          message: "Task changes are not valid.",
+        };
+        return;
+      }
+      clearError(state);
+      const previousStatusId = task.statusId;
+      Object.assign(task, changes, {
+        title: changes.title?.trim() ?? task.title,
+        description: changes.description?.trim() || undefined,
+        updatedAt: new Date().toISOString(),
+      });
+      if (changes.statusId && changes.statusId !== previousStatusId) {
+        const parentTaskId = task.parentTaskId;
+        state.tasks
+          .filter(
+            (item) =>
+              item.statusId === previousStatusId &&
+              item.parentTaskId === parentTaskId,
+          )
+          .sort((a, b) => a.position - b.position)
+          .forEach((item, index) => {
+            item.position = index;
+          });
+        const destination = state.tasks
+          .filter(
+            (item) =>
+              item.statusId === changes.statusId &&
+              item.parentTaskId === parentTaskId,
+          )
+          .sort((a, b) => a.position - b.position);
+        destination.forEach((item, index) => {
+          item.position = index;
+        });
+        task.position = destination.length;
+      }
+    },
+    archiveTask: (
+      state,
+      action: PayloadAction<{ taskId: string; currentUserId?: string }>,
+    ) => {
+      const task = state.tasks.find(
+        (item) => item.id === action.payload.taskId,
+      );
+      if (!task) return;
+      if (!canMutate(state, action.payload.currentUserId, task.primaryListId)) {
+        setError(
+          state,
+          "403: You do not have permission to archive this task.",
+        );
+        return;
+      }
+      clearError(state);
+      const archivedAt = new Date().toISOString();
+      taskTree(state, task.id).forEach((item) => {
+        item.archivedAt = archivedAt;
+      });
+    },
+    unarchiveTask: (
+      state,
+      action: PayloadAction<{ taskId: string; currentUserId?: string }>,
+    ) => {
+      const task = state.tasks.find(
+        (item) => item.id === action.payload.taskId,
+      );
+      if (!task) return;
+      if (!canMutate(state, action.payload.currentUserId, task.primaryListId)) {
+        setError(
+          state,
+          "403: You do not have permission to restore this task.",
+        );
+        return;
+      }
+      clearError(state);
+      const root = task.parentTaskId
+        ? (state.tasks.find((item) => item.id === task.parentTaskId) ?? task)
+        : task;
+      const todo = state.statuses
+        .filter(
+          (item) =>
+            item.listId === task.primaryListId && item.category === "todo",
+        )
+        .sort((a, b) => a.position - b.position)[0];
+      if (!todo) return;
+      const restored = taskTree(state, root.id);
+      restored.forEach((item) => {
+        item.archivedAt = null;
+        item.statusId = todo.id;
+      });
+      const siblings = state.tasks
+        .filter(
+          (item) =>
+            item.statusId === todo.id &&
+            item.parentTaskId === null &&
+            item.id !== root.id &&
+            item.archivedAt === null,
+        )
+        .sort((a, b) => a.position - b.position);
+      siblings.forEach((item, index) => {
+        item.position = index;
+      });
+      root.position = siblings.length;
+      restored
+        .filter((item) => item.parentTaskId === root.id)
+        .forEach((item, index) => {
+          item.position = index;
         });
     },
     moveTask: (
@@ -380,6 +529,9 @@ export const {
   updateContainerAccess,
   removeContainer,
   addTask,
+  updateTask,
+  archiveTask,
+  unarchiveTask,
   moveTask,
   clearBoardError,
 } = boardSlice.actions;
